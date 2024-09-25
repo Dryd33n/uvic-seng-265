@@ -22,17 +22,12 @@ void printIntro(const int numRespondents) {
     printf("NUMBER OF RESPONDENTS: %d\n\n", numRespondents);
 }
 
-void skipCommentLines() {
-    // char input[4096];
-    //
-    // while(fgets(input, sizeof(input), stdin) != NULL) { //continue reading from stdin so long as there is something to read
-    //     if(input[0] != '#') { // the line read is not a comment line
-    //         for (int i = 0; input[i] != '\0'; ++i) { //loops through the characters of the input until the null terminator is reached
-    //             ungetc(input[i], stdin);//push char i back into input stream
-    //         }
-    //         break;
-    //     }
-    // }
+void skipCommentLines(char *line, size_t size) {
+    while (fgets(line, size, stdin) != NULL) {
+        if (line[0] != '#') {
+            break;
+        }
+    }
 }
 
 
@@ -42,13 +37,11 @@ void skipCommentLines() {
  * @param arr the 4 bit configuration array
  */
 void readConfig(int * arr) {
-    skipCommentLines();
+    char input[16]; //Buffer to hold config line
+    skipCommentLines(input, sizeof(input));
 
     const char delim[2] = ",";
     int i = 0; //iterator for walking through tokens
-
-    char input[16]; //Buffer to hold config line
-    fgets(input, sizeof(input), stdin); //Store config line into buffer
 
     const char *token = strtok(input, delim); // get the first token
 
@@ -65,13 +58,11 @@ void readConfig(int * arr) {
  * @param questions array of Question structs
  */
 void readQuestions(struct Question * questions) {
-    skipCommentLines();
+    char input[4096];
+    skipCommentLines(input, sizeof(input));
 
     const char delim[2] = ";";
     int i = 0;
-
-    char input[4096];
-    fgets(input, sizeof(input), stdin); // read line #2 containing questions
 
     input[strcspn(input, "\n")] = '\0';
 
@@ -101,13 +92,11 @@ void readQuestions(struct Question * questions) {
  * @param questions Array of Question structs for which the direction will be assigned
  */
 void readDirections(struct Question * questions) {
-    skipCommentLines();
+    char input[1028];
+    skipCommentLines(input, sizeof(input));;
 
     const char delim[2] = ";";
     int i = 0;
-
-    char input[1028];
-    fgets(input, sizeof(input), stdin);
 
     const char *token = strtok(input, delim);
 
@@ -133,13 +122,11 @@ void readDirections(struct Question * questions) {
  * @param likerts array of strings to store the 6 likerts
  */
 void readLikerts(char(* likerts)[32]) {
-    skipCommentLines();
+    char input[128];
+    skipCommentLines(input, sizeof(input));
 
     const char delim[2] = ",";
     int i = 0;
-
-    char input[128];
-    fgets(input, sizeof(input),stdin);
 
     const char *token = strtok(input, delim);
 
