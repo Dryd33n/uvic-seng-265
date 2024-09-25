@@ -7,6 +7,8 @@
 #define NUM_QUESTIONS 38
 #define NUM_LIKERTS 6
 
+#define MAX_LINE_LEN 4096
+
 /**
  * struct to hold question, question direction and question category
  */
@@ -16,20 +18,21 @@ struct Question {
     char category[2];
 };
 
+
 void printIntro(const int numRespondents) {
     printf("Examining Science and Engineering Students' Attitudes Towards Computer Science\n");
     printf("SURVEY RESPONSE STATISTICS\n\n");
     printf("NUMBER OF RESPONDENTS: %d\n\n", numRespondents);
 }
 
-void skipCommentLines(char *line, size_t size) {
-    while (fgets(line, size, stdin) != NULL) {
-        if (line[0] != '#') {
+
+void readLine(char input[MAX_LINE_LEN]) {
+    while(fgets(input, MAX_LINE_LEN, stdin)!= NULL) {
+        if(input[0] != '#') {
             break;
         }
     }
 }
-
 
 
 /**
@@ -37,11 +40,13 @@ void skipCommentLines(char *line, size_t size) {
  * @param arr the 4 bit configuration array
  */
 void readConfig(int * arr) {
-    char input[16]; //Buffer to hold config line
-    skipCommentLines(input, sizeof(input));
-
+    char input[MAX_LINE_LEN]; //Buffer to hold config line
     const char delim[2] = ",";
     int i = 0; //iterator for walking through tokens
+
+
+
+    readLine(input);
 
     const char *token = strtok(input, delim); // get the first token
 
@@ -58,11 +63,11 @@ void readConfig(int * arr) {
  * @param questions array of Question structs
  */
 void readQuestions(struct Question * questions) {
-    char input[4096];
-    skipCommentLines(input, sizeof(input));
-
+    char input[MAX_LINE_LEN];
     const char delim[2] = ";";
     int i = 0;
+
+    readLine(input);
 
     input[strcspn(input, "\n")] = '\0';
 
@@ -92,11 +97,11 @@ void readQuestions(struct Question * questions) {
  * @param questions Array of Question structs for which the direction will be assigned
  */
 void readDirections(struct Question * questions) {
-    char input[1028];
-    skipCommentLines(input, sizeof(input));;
-
+    char input[MAX_LINE_LEN];
     const char delim[2] = ";";
     int i = 0;
+
+    readLine(input);
 
     const char *token = strtok(input, delim);
 
@@ -122,11 +127,11 @@ void readDirections(struct Question * questions) {
  * @param likerts array of strings to store the 6 likerts
  */
 void readLikerts(char(* likerts)[32]) {
-    char input[128];
-    skipCommentLines(input, sizeof(input));
-
+    char input[MAX_LINE_LEN];
     const char delim[2] = ",";
     int i = 0;
+
+    readLine(input);
 
     const char *token = strtok(input, delim);
 
@@ -169,7 +174,9 @@ void printQuestionsWithRPF(struct Question * questions, float(* rpfArr)[NUM_LIKE
     }
 }
 
-int main(void) {
+
+
+int main() {
     int config[4];                  //Configuration
     struct Question questions[NUM_QUESTIONS];  //Array Of Questions
     char likerts[NUM_LIKERTS][32];
