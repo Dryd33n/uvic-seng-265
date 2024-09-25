@@ -143,7 +143,7 @@ void readLikerts(char(* likerts)[32]) {
 
 
 
-int readResponses(int(* arrs)[5]);
+
 
 void initializeEmptyResponses(int(* responseArr)[NUM_LIKERTS]) {
     for (int i = 0; i < NUM_QUESTIONS; ++i) {
@@ -165,16 +165,44 @@ void printQuestionsWithRPF(struct Question * questions, float(* rpfArr)[NUM_LIKE
     printf("FOR EACH QUESTION BELOW, RELATIVE PERCENTUAL FREQUENCIES ARE COMPUTED FOR EACH LEVEL OF AGREEMENT\n");
 
     for (int i = 0; i < NUM_QUESTIONS; ++i) {
-        printf("\n%s\n", questions[i].question);
+        printf("\n%s", questions[i].question);
 
         for (int j = 0; j < NUM_LIKERTS; ++j) {
-            printf("%.2f: ", rpfArr[i][j]);
-            printf("%s\n", likerts[j]);
+            printf("\n%.2f: ", rpfArr[i][j]);
+            printf("%s", likerts[j]);
         }
     }
 }
 
 
+
+void tokenizeResponse(int(* responseArr)[NUM_QUESTIONS], char * input, int index){
+    char delim[2] = ",";
+    int i = 0;
+
+    const char *token = strtok(input, delim);
+
+    while (token != NULL) {
+        if(i > 2) {
+        }
+
+        token = strtok(NULL, delim);
+        i++;
+    }
+}
+
+int readResponses(int(* responseArr)[NUM_QUESTIONS]) {
+    char input[MAX_LINE_LEN];
+    int i = 0;
+
+    while (fgets(input, MAX_LINE_LEN, stdin)) {
+        if(input[0] != '#') {
+            tokenizeResponse(responseArr, input , i);
+        }
+    }
+
+    return i;
+}
 
 int main() {
     int config[4];                  //Configuration
@@ -198,9 +226,11 @@ int main() {
         initializeEmptyResponsesRPF(responsesRPF);
         printIntro(numRespondents);
         printQuestionsWithRPF(questions, responsesRPF, likerts);
-    }else {
-
+    }else{
+        
         if(config[1]==1) {
+            //numRespondents = readResponses(responses);
+            //printIntro(numRespondents);
             printQuestionsWithRPF(questions, responsesRPF, likerts);
         }
     }
