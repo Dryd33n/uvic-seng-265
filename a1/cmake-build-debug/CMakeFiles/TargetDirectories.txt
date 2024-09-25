@@ -1,0 +1,3 @@
+C:/Users/Dryden/Documents/Uvic GitHub/uvic-seng-265/uvic-seng-265/a1/cmake-build-debug/CMakeFiles/a1.dir
+C:/Users/Dryden/Documents/Uvic GitHub/uvic-seng-265/uvic-seng-265/a1/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Dryden/Documents/Uvic GitHub/uvic-seng-265/uvic-seng-265/a1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
