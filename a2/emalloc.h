@@ -6,5 +6,7 @@ void *emalloc(size_t);
 
 void freeRespondeeTokens(char **respondeeTokens, int numRespondeeTokens);
 void freeRespondee(Respondee respondee, int numQuestions);
+void freeSummateArr(int** sumArr, int numQuestions);
+void free2dArr(void** arr, int arrDepth);
 
 #endif

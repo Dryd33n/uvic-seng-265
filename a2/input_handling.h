@@ -4,12 +4,25 @@
 /* add your include and prototypes here*/
 #include <stdio.h>
 #include <string.h>
+#include "dyn_survey.h"
 
 int *readConfig();
-Question* readQuestions();
-void readDirections(Question * questions);
-char** readLikerts();
-int readNumResponses();
-Respondee* readResponses(int numResponses);
+
+Survey readSurvey();
+int* filterSurvey(Survey* survey);
+
+
+struct filter {
+    bool filterProgram;
+    char* program;
+
+    bool filterFromCan;
+    bool fromCan;
+
+    bool filterAge;
+    int minAge;
+    int maxAge;
+};
+typedef struct filter Filter;
 
 #endif

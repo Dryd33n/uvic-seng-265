@@ -30,3 +30,17 @@ void freeRespondeeTokens(char **respondeeTokens, int numRespondeeTokens) {
     free(respondeeTokens);
 }
 
+
+void freeSummateArr(int** sumArr, const int numQuestions) {
+    for (int i = 0; i < numQuestions; ++i) {
+        free(sumArr[i]);
+    }
+    free(sumArr);
+}
+
+void free2dArr(void** arr, const int arrDepth) {
+    for (int i = 0; i < arrDepth; ++i) {
+        free(arr[i]);
+    }
+    free(arr);
+}

@@ -1,7 +1,10 @@
+#include "input_handling.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "emalloc.h"
 #include "dyn_survey.h"
@@ -68,7 +71,7 @@ int* readConfig() {
     return configArr;
 }
 
-Question* readQuestions() {
+rqr readQuestions() {
     const char* delim = ";";
     char buffer[MAX_LINE_LEN];
     readLine(buffer);
@@ -99,7 +102,11 @@ Question* readQuestions() {
         token = strtok(NULL, delim);
     }
 
-    return questions;
+    rqr res;
+    res.questions = questions;
+    res.numQuestions = numQuestions;
+
+    return res;
 }
 
 void readDirections(Question* questions) {
@@ -123,7 +130,7 @@ void readDirections(Question* questions) {
     }
 }
 
-char** readLikerts() {
+rlr readLikerts() {
     const char* delim = ",";
     char buffer[MAX_LINE_LEN];
     readLine(buffer);
@@ -142,9 +149,10 @@ char** readLikerts() {
         i++;
     }
 
-
-
-    return likerts;
+    rlr res;
+    res.likerts = likerts;
+    res.numLikerts = numLikerts;
+    return res;
 }
 
 int readNumResponses() {
@@ -170,7 +178,7 @@ char** tokenizeRespondee(char* buffer, const int numTokens) {
     return respondeeTokens;
 }
 
-Date tokenizeRespondeeBirthday(char * respondee_token) {
+Date tokenizeDate(char * respondee_token) {
     Date birthday;
     birthday.day = birthday.month = birthday.year = -1;
 
@@ -191,6 +199,19 @@ Date tokenizeRespondeeBirthday(char * respondee_token) {
     return birthday;
 }
 
+int calculateAge(Date birthdate) {
+    char dateStr[32];
+    const time_t current_time = time(NULL);
+    strftime(dateStr, 32, "%Y-%m-%d", localtime(&current_time));
+    const Date curDate = tokenizeDate(dateStr);
+    int age = curDate.year - birthdate.year;
+
+    if(curDate.month < birthdate.month || ((curDate.month == birthdate.month) && (curDate.day < birthdate.day))) {
+        age--;
+    }
+
+    return age;
+}
 
 
 Respondee constructRespondent(char buffer[MAX_LINE_LEN]) {
@@ -201,16 +222,15 @@ Respondee constructRespondent(char buffer[MAX_LINE_LEN]) {
 
 
     respondee.program = emalloc(sizeof(char) * (strlen(respondeeTokens[0])+1));
-    respondee.response = emalloc(sizeof(char *) * (numRespondeeTokens -3));
-
-
-
     strcpy(respondee.program, respondeeTokens[0]);
+
     respondee.fromCanada = (strcmp(respondeeTokens[1], "yes") == 0);
-    respondee.birthday = tokenizeRespondeeBirthday(respondeeTokens[2]);
 
+    respondee.birthday = tokenizeDate(respondeeTokens[2]);
 
+    respondee.age = calculateAge(respondee.birthday);
 
+    respondee.response = emalloc(sizeof(char *) * (numRespondeeTokens -3));
     for (int i = 0; i < (numRespondeeTokens-3); ++i) {
         respondee.response[i] = emalloc(sizeof(char)*(strlen(respondeeTokens[i+3])+1));
         strcpy(respondee.response[i],respondeeTokens[i+3]);
@@ -246,3 +266,148 @@ Respondee* readResponses(const int numResponses) {
 
     return respondees;
 }
+
+
+Survey readSurvey() {
+    Survey survey;
+
+    const rqr resQ = readQuestions();
+    survey.questions = resQ.questions;
+    survey.counts.numQuestions = resQ.numQuestions;
+
+    readDirections(survey.questions);
+
+    const rlr resL = readLikerts();
+    survey.likerts = resL.likerts;
+    survey.counts.numLikerts = resL.numLikerts;
+
+    survey.counts.numRespondents = readNumResponses();
+    survey.counts.numFilteredOutRespondents =0;
+
+    survey.respondees = readResponses(survey.counts.numRespondents);
+
+    return survey;
+}
+
+Filter newBlankFilter(void) {
+    Filter filter;
+
+    filter.filterProgram = false;
+    filter.filterFromCan = false;
+    filter.filterAge = false;
+
+    filter.program = NULL;
+    filter.fromCan = NULL;
+    filter.minAge = -1;
+    filter.maxAge = -1;
+
+    return filter;
+}
+
+void editFilter(Filter *filter, char* filterStr) {
+    int filterVal = -1;
+    int i = 0;
+
+
+    const char* token = strtok(filterStr, ",");
+
+    while(token != NULL) {
+
+        if(i == 0) {
+            filterVal = atoi(token);
+        }else {
+            switch (filterVal) {
+                case 0:
+                    filter->filterProgram = true;
+                    filter->program = emalloc(sizeof(char)*(strlen(token)+1));
+                    strcpy(filter->program, token);
+                    return;
+                case 1:
+                    filter->filterFromCan = true;
+                    filter->fromCan = (strcmp("yes", token)==0);
+                    return;
+                case 2:
+                    filter->filterAge = true;
+                    if(i==1) {
+                        filter->minAge = atoi(token);
+                    }else {
+                        filter->maxAge = atoi(token);
+                        return;
+                    }
+                default:
+            }
+        }
+
+        i++;
+        token = strtok(NULL, ",");
+    }
+}
+
+
+void filterProgram(int* filterMap, char* program, Survey survey) {
+    for (int i = 0; i < survey.counts.numRespondents; ++i) {
+        if(strcmp(program, survey.respondees[i].program)!=0){ filterMap[i] = 0;}
+    }
+}
+
+void filterFromCan(int* filterMap, bool fromCan, Survey survey) {
+    for (int i = 0; i < survey.counts.numRespondents; ++i) {
+        if(fromCan != survey.respondees[i].fromCanada){ filterMap[i] = 0;}
+    }
+}
+
+void filterAge(int* filterMap, int minAge, int maxAge, Survey survey) {
+    for (int i = 0; i < survey.counts.numRespondents; ++i) {
+        if(!((minAge <= survey.respondees[i].age) && (survey.respondees[i].age <= maxAge) )){ filterMap[i] = 0;}
+    }
+}
+
+int* filterSurvey(Survey* survey) {
+    Filter filter = newBlankFilter();
+    int filteredOutRespondents = 0;
+
+
+    int* filterMap = emalloc(sizeof(int)*survey->counts.numRespondents);
+    for (int j = 0; j < survey->counts.numRespondents; ++j) {
+        filterMap[j] = 1;
+    }
+
+    int i = 0;
+    while(i < 3) {
+        char buffer[MAX_LINE_LEN]="-1";
+        readLine(buffer);
+
+        if(strcmp(buffer, "-1")==0) {   //if buffer did not get modified since at EOF
+            break;
+        }
+
+        editFilter(&filter, buffer);
+
+        i++;
+    }
+
+    if(!filter.filterProgram && !filter.filterFromCan && !filter.filterAge) {
+        return filterMap;
+    }
+
+    if(filter.filterProgram) {
+        filterProgram(filterMap, filter.program, *survey);
+    }
+
+    if(filter.filterFromCan) {
+        filterFromCan(filterMap, filter.fromCan, *survey);
+    }
+
+    if(filter.filterAge) {
+        filterAge(filterMap, filter.minAge, filter.maxAge, *survey);
+    }
+
+    for (int i = 0; i < survey->counts.numRespondents; ++i) {
+        if(filterMap[i]==0) filteredOutRespondents++;
+    }
+
+    survey->counts.numFilteredOutRespondents = filteredOutRespondents;
+
+    return filterMap;
+}
+

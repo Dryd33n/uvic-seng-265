@@ -22,8 +22,39 @@ struct respondee {
     char* program;       //respondee program
     bool fromCanada;        //is respondee from canada
     Date birthday;      //respondee birthday
+    int age;
     char** response;  //respondee responses stored as strings
 };
 typedef struct respondee Respondee;
+
+struct readQuestionRes {
+    Question* questions;
+    int numQuestions;
+};
+typedef struct readQuestionRes rqr;
+
+struct readLikertRes {
+    char** likerts;
+    int numLikerts;
+};
+typedef  struct readLikertRes rlr;
+
+
+
+struct counts {
+    int numQuestions;
+    int numLikerts;
+    int numRespondents;
+    int numFilteredOutRespondents;
+};
+typedef struct counts Counts;
+
+struct survey {
+    Question* questions;
+    Respondee* respondees;
+    char ** likerts;
+    Counts counts;
+};
+typedef struct survey Survey;
 
 #endif
