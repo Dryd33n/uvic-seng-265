@@ -9,7 +9,7 @@
 int *readConfig();
 
 Survey readSurvey();
-int* filterSurvey(Survey* survey);
+int* createFilterMap(Survey* survey);
 
 
 struct filter {

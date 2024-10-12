@@ -19,7 +19,8 @@ int main(){
     /* READ DATA */
     int* config     = readConfig();              //reads config from stdin
     Survey survey   = readSurvey();              //reads questions, directions, likerts, respondees
-    int* filterMap  = filterSurvey(&survey);     //reads filters at bottom
+    int* filterMap  = createFilterMap(&survey);     //reads filters at bottom
+
 
 
     /* PROCESSING AND OUTPUT */
@@ -46,6 +47,7 @@ int main(){
 
         free2dArr((void**)catScores, 5);                                  //Free category scores data array
     }
+
 
 
     /* FREE DYNAMICALLY ALLOCATED MEMORY */

@@ -1,27 +1,52 @@
-#include "input_handling.h"
+//HEADER INCLUSIONS
+#include "input_handling.h" //For structs
+#include "emalloc.h"        //For allocation memory
+#include "dyn_survey.h"     //For structs
 
+//LIBRARY INCLUSIONS
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#include "emalloc.h"
-#include "dyn_survey.h"
 
+//MACRO DEFINITIONS
 #define MAX_LINE_LEN 3000
 
-void readLine(char input[MAX_LINE_LEN]) {
+
+
+
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ *
+ *                           ╔══════════════════════════════╗
+ *                           ║       UTILITY FUNCTIONS      ║
+ *                           ╚══════════════════════════════╝
+ *
+ *░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
+
+
+/**READ LINE:
+ *Continuously reads from stdin until a non-comment line is found and stores it in the input string
+ *
+ * @param input the string which will be written to by stdin
+ */
+void readLine(char* input) {
     while(fgets(input, MAX_LINE_LEN, stdin)!= NULL) {//read from stdin until EOF
         input[strcspn(input, "\n")] = '\0';
-        if(input[0] != '#') {
+        if(input[0] != '#') { //keep reading if line is a comment
             break; //stop reading from stdin when non comment line has been found
         }
     }
 }
 
 
-/**COUNT TOKENS
+
+
+
+/**COUNT TOKENS:
  *Function to count number of tokens in a given string, adapted from dynamic_memory_example.c
  *given by Roberto Bittencourt
  *
@@ -50,128 +75,49 @@ int countTokens(const char * string, const char * delim) {
     return num_tokens;
 }
 
-int* readConfig() {
-    const char* delim = ",";
-    char buffer[MAX_LINE_LEN]; //buffer to hold line
-    readLine(buffer);          //store stdin line to buffer
-
-    const int configTokens = countTokens(buffer, delim);        //number of tokens
-    int * configArr = emalloc(sizeof(int) * configTokens); //integer array to store config tokens
-
-
-    const char* token = strtok(buffer, delim);  //get the first token from the buffer
-    int i = 0;                                  //counter to assign token into array
-
-    while (token != NULL) {
-        configArr[i] = atoi(token); //stores integer conversion of token into array
-        token = strtok(NULL, delim);//gets the next token
-        i++;
-    }
-
-    return configArr;
-}
-
-rqr readQuestions() {
-    const char* delim = ";";
-    char buffer[MAX_LINE_LEN];
-    readLine(buffer);
-
-    const int numQuestions = countTokens(buffer, delim);
-    Question* questions = emalloc(sizeof(Question) * numQuestions);
-
-    const char* token = strtok(buffer, delim);
-
-
-    int i = 0;
-    while(token != NULL) {
-        Question curQuestion;
-        curQuestion.question = emalloc(sizeof(char) * (strlen(token)+1));
-
-        strcpy(curQuestion.question, token); // Assign question
 
 
 
-        curQuestion.category[0] = token[0]; // Assign question category
-        curQuestion.category[1] = '\0'; // Ensure null termination
-
-        curQuestion.directDirection = true; //set default value
 
 
 
-        questions[i++] = curQuestion;
-        token = strtok(NULL, delim);
-    }
-
-    rqr res;
-    res.questions = questions;
-    res.numQuestions = numQuestions;
-
-    return res;
-}
-
-void readDirections(Question* questions) {
-    const char* delim = ";";
-    char buffer[MAX_LINE_LEN];
-    readLine(buffer);
 
 
-    const char* token = strtok(buffer, delim);
 
-    int i = 0;
-    while (token != NULL) {
-        if(strcmp(token, "Direct")==0) {
-            questions[i].directDirection = true;
-        }else if(strcmp(token, "Reverse")==0) {
-            questions[i].directDirection = false;
-        }
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ *
+ *                           ╔══════════════════════════════╗
+ *                           ║   SURVEY READING FUNCTIONS   ║
+ *                           ╚══════════════════════════════╝
+ *
+ *░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-        i++;
-        token = strtok(NULL, delim);
-    }
-}
+/*              ╔══════════════════════════════════╗
+ *              ║  RESPONDEE TOKENIZATION HELPERS  ║
+ *              ╚══════════════════════════════════╝
+ */
 
-rlr readLikerts() {
-    const char* delim = ",";
-    char buffer[MAX_LINE_LEN];
-    readLine(buffer);
 
-    const int numLikerts = countTokens(buffer, delim);
-    char** likerts = emalloc(sizeof(char *) * numLikerts);
 
-    const char* token = strtok(buffer, delim);
-
-    int i = 0;
-    while (token != NULL) {
-        likerts[i] = emalloc(sizeof(char) * (strlen(token)+1));
-        strcpy(likerts[i], token);
-
-        token = strtok(NULL, delim);
-        i++;
-    }
-
-    rlr res;
-    res.likerts = likerts;
-    res.numLikerts = numLikerts;
-    return res;
-}
-
-int readNumResponses() {
-    char buffer[MAX_LINE_LEN];
-    readLine(buffer);
-    return atoi(buffer);
-}
-
+/**TOKENIZE RESPONDEE:
+ *Converts the line from stdin to a char array containing the tokens
+ *
+ * @param buffer the string to be tokenized
+ * @param numTokens the number of tokens in the string
+ * @return the char array containing the tokens
+ */
 char** tokenizeRespondee(char* buffer, const int numTokens) {
-    char** respondeeTokens = emalloc(sizeof(char *) * numTokens);
+    char** respondeeTokens = emalloc(sizeof(char *) * numTokens); //allocate memory for tokens
 
-    char* token = strtok(buffer, ",");
-
+    /* TOKENIZATION */
+    char* token = strtok(buffer, ","); //get first token
     int i = 0;
     while(token != NULL) {
-        token[strcspn(token, "\n")] = '\0';
-        respondeeTokens[i] = emalloc(sizeof(char) * (strlen(token)+1));
-        strcpy(respondeeTokens[i],token);
-        token = strtok(NULL, ",");
+        token[strcspn(token, "\n")] = '\0';                    //remove newline character from token
+        respondeeTokens[i] = emalloc(sizeof(char) * (strlen(token)+1)); //allocate memory for token
+        strcpy(respondeeTokens[i],token);                               //store token in array
+
+        token = strtok(NULL, ","); //get token
         i++;
     }
 
@@ -180,35 +126,60 @@ char** tokenizeRespondee(char* buffer, const int numTokens) {
     return respondeeTokens;
 }
 
+
+
+
+
+/**TOKENIZE DATE:
+ *Converts the date string to a Date struct
+ *
+ * @param respondee_token the string containing the date
+ * @return the Date struct containing the date
+ */
 Date tokenizeDate(char * respondee_token) {
-    Date birthday;
-    birthday.day = birthday.month = birthday.year = -1;
+    const char* delim =  "-";
 
-    const char* token = strtok(respondee_token, "-");
+    Date birthday;                                      //create a new date struct
+    birthday.day = birthday.month = birthday.year = -1; //set default values
 
+    /* TOKENIZATION */
+    const char* token = strtok(respondee_token, delim); //get first token
     for (int i = 0; i < 3; ++i) {
-        if(i == 0) {
-            birthday.year = atoi(token);
-        }else if (i == 1) {
-            birthday.month = atoi(token);
-        }else if (i == 2) {
-            birthday.day = atoi(token);
+        if(i == 0) {                        //First token, store in year
+            birthday.year = atoi(token);    //convert token to integer and store in year
+        }else if (i == 1) {                 //Second token, store in month
+            birthday.month = atoi(token);   //convert token to integer and store in month
+        }else if (i == 2) {                 //Third token, store in day
+            birthday.day = atoi(token);     //convert token to integer and store in day
         }
 
-        token = strtok(NULL, "-");
+        token = strtok(NULL, delim);  //get next token
     }
 
     return birthday;
 }
 
-int calculateAge(Date birthdate) {
-    char dateStr[32];
-    const time_t current_time = time(NULL);
-    strftime(dateStr, 32, "%Y-%m-%d", localtime(&current_time));
-    const Date curDate = tokenizeDate(dateStr);
-    int age = curDate.year - birthdate.year;
 
-    if(curDate.month < birthdate.month || ((curDate.month == birthdate.month) && (curDate.day < birthdate.day))) {
+
+
+
+/**CALCULATE AGE:
+ *Calculates the age of the respondee based on the birthdate and current date
+ *
+ * @param birthdate the birthdate of the respondee
+ * @return the age of the respondee
+ */
+int calculateAge(Date birthdate) {
+    char* dateStr = emalloc(sizeof(char)*16);                                        //allocate memory for date string
+    const time_t current_time = time(NULL);                                          //get current time
+    strftime(dateStr, 32, "%Y-%m-%d", localtime(&current_time)); //store current date in dateStr
+    const Date curDate = tokenizeDate(dateStr);                                      //convert current date to struct
+    free(dateStr);                                                                   //free date string
+
+    int age = curDate.year - birthdate.year; //base age calculation on year difference
+
+    /* Decrease age if current date is before birthday */
+    if(curDate.month < birthdate.month ||  ((curDate.month == birthdate.month) && (curDate.day < birthdate.day))) {
         age--;
     }
 
@@ -216,80 +187,309 @@ int calculateAge(Date birthdate) {
 }
 
 
-Respondee constructRespondent(char buffer[MAX_LINE_LEN]) {
-    Respondee respondee;
-    const char delim[2] = ",";
-    const int numRespondeeTokens = countTokens(buffer,delim);
-    char** respondeeTokens = tokenizeRespondee(buffer, numRespondeeTokens);
 
 
-    respondee.program = emalloc(sizeof(char) * (strlen(respondeeTokens[0])+1));
-    strcpy(respondee.program, respondeeTokens[0]);
 
-    respondee.fromCanada = strcmp(respondeeTokens[1], "yes") == 0;
+/**CONSTRUCT RESPONDEE:
+ *Constructs a respondee struct from the input string
+ *
+ * @param buffer the string containing the respondee information
+ * @return the constructed respondee struct
+ */
+Respondee constructRespondent(char* buffer) {
+    Respondee respondee; //create a new respondee struct
 
-    respondee.birthday = tokenizeDate(respondeeTokens[2]);
+    const char delim[2] = ",";                                              //delimiter for tokens
+    const int numRespondeeTokens = countTokens(buffer,delim);          //count number of tokens
+    char** respondeeTokens = tokenizeRespondee(buffer, numRespondeeTokens); //tokenize the string
 
-    respondee.age = calculateAge(respondee.birthday);
 
-    respondee.response = emalloc(sizeof(char *) * (numRespondeeTokens -3));
+    respondee.program = emalloc(sizeof(char) * (strlen(respondeeTokens[0])+1)); //allocate memory for program
+    strcpy(respondee.program, respondeeTokens[0]);                              //store program in respondee
+
+    respondee.fromCanada = strcmp(respondeeTokens[1], "yes") == 0; //convert fromCanada to boolean and store
+
+    respondee.birthday = tokenizeDate(respondeeTokens[2]); //convert birthday to Date struct and store
+
+    respondee.age = calculateAge(respondee.birthday); //calculate age and store
+
+    respondee.response = emalloc(sizeof(char *) * (numRespondeeTokens-3)); //allocate memory for responses
     for (int i = 0; i < numRespondeeTokens-3; ++i) {
-        respondee.response[i] = emalloc(sizeof(char)*(strlen(respondeeTokens[i+3])+1));
-        strcpy(respondee.response[i],respondeeTokens[i+3]);
+        respondee.response[i] = emalloc(sizeof(char)*(strlen(respondeeTokens[i+3])+1)); //allocate memory for response
+        strcpy(respondee.response[i],respondeeTokens[i+3]); //store response in respondee
     }
 
-    free2dArr((void**)respondeeTokens, numRespondeeTokens);
+    free2dArr((void**)respondeeTokens, numRespondeeTokens); //free memory allocated for tokens
     return respondee;
 }
 
+
+
+
+
+
+/*              ╔═══════════════════════════════════╗
+ *              ║   MAIN SURVEY READING FUNCTIONS   ║
+ *              ╚═══════════════════════════════════╝
+ */
+
+
+/**READ CONFIG:
+ *Reads the config from stdin and stores it in an integer array
+ *
+ * @return the integer array containing the config
+ */
+int* readConfig() {
+     const char* delim = ",";
+     char* buffer = emalloc(sizeof(char)*MAX_LINE_LEN);  //buffer to hold line
+     readLine(buffer);                                   //store stdin line to buffer
+
+     const int configTokens = countTokens(buffer, delim);    //number of tokens
+     int * configArr = emalloc(sizeof(int) * configTokens);       //integer array to store config tokens
+
+
+     const char* token = strtok(buffer, delim);  //get the first token from the buffer
+     int i = 0;                                  //counter to assign token into array
+
+     while (token != NULL) {
+         configArr[i] = atoi(token); //stores integer conversion of token into array
+         token = strtok(NULL, delim);//gets the next token
+         i++;
+     }
+
+
+
+     free(buffer);
+    return configArr;
+}
+
+
+
+
+
+/**READ QUESTIONS:
+ *Reads the questions from stdin and stores them in a Question struct array
+ *
+ * @return the Question array containing the questions
+ */
+rqr readQuestions() {
+    const char* delim = ";";                          //delimiter for questions
+    char* buffer = emalloc(sizeof(char)*MAX_LINE_LEN);//allocate buffer to store line
+    readLine(buffer);                                 //store stdin line to buffer
+
+    const int numQuestions = countTokens(buffer, delim);       //count number of questions
+    Question* questions = emalloc(sizeof(Question) * numQuestions); //allocate array of questions
+
+
+    /* TOKENIZATION */
+    const char* token = strtok(buffer, delim); //get first token
+    int i = 0;
+    while(token != NULL) {
+        Question curQuestion;                                             //create a new question struct
+        curQuestion.question = emalloc(sizeof(char) * (strlen(token)+1)); //allocate memory for question
+
+        strcpy(curQuestion.question, token); //Set question value
+        curQuestion.category[0] = token[0];  //Set question category
+        curQuestion.category[1] = '\0';      //Ensure null termination For category
+
+        curQuestion.directDirection = true;  //set default value
+
+        questions[i++] = curQuestion;        //store question in array
+
+        token = strtok(NULL, delim);         //get next token
+    }
+
+
+    free(buffer); //Free memory allocated for buffer
+
+    rqr res;                        //create a result struct to be returned containing questions and number of questions
+    res.questions = questions;      //set questions
+    res.numQuestions = numQuestions;//set number of questions
+    return res;                     //return structs
+}
+
+
+
+
+
+/**READ DIRECTIONS:
+ *Reads the question direction from stdin and stores them in the Question struct array
+ *
+ * @param questions the array of questions to store the directions
+ */
+void readDirections(Question* questions) {
+    const char* delim = ";";                           //delimiter for directions
+    char* buffer = emalloc(sizeof(char)*MAX_LINE_LEN); //allocate buffer to store line
+    readLine(buffer);                                  //store stdin line to buffer
+
+
+    /* TOKENIZATION */
+    const char* token = strtok(buffer, delim); //get first token
+    int i = 0;
+    while (token != NULL) {
+        if(strcmp(token, "Direct")==0) {         //convert token to boolean
+            questions[i].directDirection = true;
+        }else if(strcmp(token, "Reverse")==0) {
+            questions[i].directDirection = false;
+        }
+
+        i++;
+        token = strtok(NULL, delim); // get next token
+    }
+
+    free(buffer); //Free memory allocated for buffer
+}
+
+
+
+
+
+/**READ LIKERTS:
+ *Reads the likerts from stdin and stores them in a char array
+ *
+ * @return the char array containing the likerts and count of likerts in a struct
+ */
+rlr readLikerts() {
+    const char* delim = ",";                           //delimiter for likerts
+    char* buffer = emalloc(sizeof(char)*MAX_LINE_LEN); //allocate buffer to store line
+    readLine(buffer);                                  //store stdin line to buffer
+
+    const int numLikerts = countTokens(buffer, delim);  //count number of likerts
+
+    char** likerts = emalloc(sizeof(char *) * numLikerts);   //allocate array of likerts
+
+    /* TOKENIZATION */
+    const char* token = strtok(buffer, delim);  //get first token
+    int i = 0;
+    while (token != NULL) {
+        likerts[i] = emalloc(sizeof(char) * (strlen(token)+1)); //allocate memory for likert
+        strcpy(likerts[i], token);                              //store likert in array
+
+        token = strtok(NULL, delim);// get next token
+        i++;
+    }
+
+    free(buffer);   //Free memory allocated for buffer
+
+    rlr res;                    //create a result struct to be returned containing likerts and number of likerts
+    res.likerts = likerts;      //set likerts
+    res.numLikerts = numLikerts;//set number of likerts
+    return res;                 //return result struct
+}
+
+
+
+
+
+/**READ NUM RESPONSES:
+ *Reads the number of responses from stdin
+ *
+ * @return the number of responses
+ */
+int readNumResponses() {
+    char* buffer =  emalloc(sizeof(char)*MAX_LINE_LEN); //buffer to store line
+    readLine(buffer);                                   //store stdin line to buffer
+
+    const int result = atoi(buffer); //convert buffer to integer
+    free(buffer);                    //free buffer
+
+    return result;                   //return integer
+}
+
+
+
+
+
+/**READ RESPONSES:
+ *Reads the responses from stdin and stores them in a Respondee struct array
+ *
+ * @param numResponses the number of responses to read
+ * @return the Respondee array containing the responses
+ */
 Respondee* readResponses(const int numResponses) {
     int i = 0;
     Respondee* respondees = emalloc(sizeof(Respondee) * numResponses);
 
-    while ( i < numResponses) {// for each input line containing response information
-        char buffer[MAX_LINE_LEN];
-        fgets(buffer, sizeof(buffer), stdin);
-
-        if(buffer[0] != '#') {//ignore line if it is a comment line and keep reading
-
-
-
+    while ( i < numResponses) {                            //for each input line containing response information
+        char* buffer = emalloc(sizeof(char)*MAX_LINE_LEN); //allocate buffer to store line
+        fgets(buffer, MAX_LINE_LEN, stdin);     //store stdin line to buffer
+        if(buffer[0] != '#') {                           //if line isn't a comment
             respondees[i] = constructRespondent(buffer); //send line off to construct respondent
             i++;
-
         }
+
+        free(buffer);  //free buffer
     }
-
-
-
-
 
     return respondees;
 }
 
 
+
+
+
+/**READ SURVEY:
+ *Reads the survey from stdin and stores it in a Survey struct
+ *
+ * @return the Survey struct containing the survey information
+ */
 Survey readSurvey() {
     Survey survey;
 
-    const rqr resQ = readQuestions();
-    survey.questions = resQ.questions;
-    survey.counts.numQuestions = resQ.numQuestions;
+    /* READ QUESTIONS */
+    const rqr resQ              = readQuestions();  //get questions array and number of questions
+    survey.questions            = resQ.questions;   //store questions in survey
+    survey.counts.numQuestions  = resQ.numQuestions;//store number of questions in survey
 
-    readDirections(survey.questions);
+    /* READ DIRECTIONS */
+    readDirections(survey.questions); //modify questions array to include directions
 
-    const rlr resL = readLikerts();
-    survey.likerts = resL.likerts;
-    survey.counts.numLikerts = resL.numLikerts;
+    /* READ LIKERTS */
+    const rlr resL           = readLikerts();  //get likerts array and number of likerts
+    survey.likerts           = resL.likerts;   //store likerts in survey
+    survey.counts.numLikerts = resL.numLikerts;//store number of likerts in survey
 
-    survey.counts.numRespondents = readNumResponses();
-    survey.counts.numFilteredOutRespondents =0;
-    survey.counts.numValidRespondents = survey.counts.numRespondents;
+    /* READ NUM RESPONSES */
+    survey.counts.numRespondents            = readNumResponses();           //store number of respondents in survey
+    survey.counts.numFilteredOutRespondents = 0;                            //set default value for filtered out respondents
+    survey.counts.numValidRespondents       = survey.counts.numRespondents; //set default value for valid respondents
 
-    survey.respondees = readResponses(survey.counts.numRespondents);
+    /* READ RESPONSES */
+    survey.respondees = readResponses(survey.counts.numRespondents); //store respondees in survey
 
     return survey;
 }
 
+
+
+
+
+
+
+
+
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ *
+ *                           ╔══════════════════════════════╗
+ *                           ║  SURVEY FILTERING FUNCTIONS  ║
+ *                           ╚══════════════════════════════╝
+ *
+ *░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
+
+/*              ╔══════════════════════════════════╗
+ *              ║        FILTERING HELPERS         ║
+ *              ╚══════════════════════════════════╝
+ */
+
+
+
+/**NEW BLANK FILTER:
+ *Creates a new blank filter struct with all values set to false or -1
+ *
+ * @return the new blank filter
+ */
 Filter newBlankFilter(void) {
     Filter filter;
 
@@ -305,34 +505,43 @@ Filter newBlankFilter(void) {
     return filter;
 }
 
+
+
+
+/**EDIT FILTER:
+ *Edits the filter struct based on the input string
+ *
+ * @param filter the filter struct to be edited
+ * @param filterStr the string containing the filter information
+ */
 void editFilter(Filter *filter, char* filterStr) {
-    int filterVal = -1;
+    int filterVal = -1; //default value for filter val, used to determine which filter is being edited
+    const char* delim = ",";
+
+    /* TOKENIZATION */
+    const char* token = strtok(filterStr, delim);
     int i = 0;
-
-
-    const char* token = strtok(filterStr, ",");
-
     while(token != NULL) {
 
-        if(i == 0) {
+        if(i == 0) {// First token determines which filter is being edited
             filterVal = atoi(token);
         }else {
             switch (filterVal) {
-                case 0:
-                    filter->filterProgram = true;
-                    filter->program = emalloc(sizeof(char)*(strlen(token)+1));
-                    strcpy(filter->program, token);
+                case 0: //filter program
+                    filter->filterProgram = true;                               //set filter program to true
+                    filter->program = emalloc(sizeof(char)*(strlen(token)+1));  //allocate memory for program
+                    strcpy(filter->program, token);                             //store program in filter
                     return;
-                case 1:
-                    filter->filterFromCan = true;
-                    filter->fromCan = strcmp("yes", token)==0;
-                    return;
-                case 2:
-                    filter->filterAge = true;
-                    if(i==1) {
-                        filter->minAge = atoi(token);
-                    }else {
-                        filter->maxAge = atoi(token);
+                case 1: //filter fromCan
+                    filter->filterFromCan = true;               //set filter fromCan to true
+                    filter->fromCan = strcmp("yes", token)==0;  //convert token to boolean and store in fromCan
+                    return;                                     //return after setting fromCan
+                case 2: //filter age
+                    filter->filterAge = true;         //set filter age to true
+                    if(i==1) {                        //if first token, store in minAge
+                        filter->minAge = atoi(token); //convert token to integer and store in minAge
+                    }else {                           //if second token, store in maxAge
+                        filter->maxAge = atoi(token); //convert token to integer and store in maxAge
                         return;
                     }
                 default:
@@ -340,77 +549,124 @@ void editFilter(Filter *filter, char* filterStr) {
         }
 
         i++;
-        token = strtok(NULL, ",");
+        token = strtok(NULL, delim); //get next token
     }
 }
 
 
-void filterProgram(int* filterMap, const char* program, Survey survey) {
-    for (int i = 0; i < survey.counts.numRespondents; ++i) {
-        if(strcmp(program, survey.respondees[i].program)!=0){ filterMap[i] = 0;}
+
+
+
+/**FILTER PROGRAM:
+ *Edits the filter map to filter out respondees who are not in the specified program
+ *
+ * @param filterMap the filter map to be modified
+ * @param program the program to filter by
+ * @param survey the survey containing the respondees
+ */
+void filterProgram(int* filterMap, const char* program, const Survey survey) {
+    for (int i = 0; i < survey.counts.numRespondents; ++i) {                     //for each respondee
+        if(strcmp(program, survey.respondees[i].program)!=0){ filterMap[i] = 0;} //if respondee is not in program, set filterMap to 0
     }
 }
 
+
+
+
+
+/**FILTER FROM CAN:
+ *Edits the filter map to filter out respondees who are not from Canada
+ *
+ * @param filterMap the filter map to be modified
+ * @param fromCan the boolean value to filter by
+ * @param survey the survey containing the respondees
+ */
 void filterFromCan(int* filterMap, bool fromCan, Survey survey) {
-    for (int i = 0; i < survey.counts.numRespondents; ++i) {
-        if(fromCan != survey.respondees[i].fromCanada){ filterMap[i] = 0;}
+    for (int i = 0; i < survey.counts.numRespondents; ++i) {                //for each respondee
+        if(fromCan != survey.respondees[i].fromCanada){ filterMap[i] = 0;}  //if respondee is not from Canada, set filterMap to 0
     }
 }
 
-void filterAge(int* filterMap, int minAge, int maxAge, Survey survey) {
-    for (int i = 0; i < survey.counts.numRespondents; ++i) {
-        if(!(minAge <= survey.respondees[i].age && survey.respondees[i].age <= maxAge) ){ filterMap[i] = 0;}
+
+
+
+
+/** FILTER AGE:
+ *Edits the filter map to filter out respondees who are not within the specified age range
+ *
+ * @param filterMap the filter map to be modified
+ * @param minAge the minimum age to filter by
+ * @param maxAge the maximum age to filter by
+ * @param survey the survey containing the respondees
+ */
+void filterAge(int* filterMap, const int minAge, const int maxAge, const Survey survey) {
+    for (int i = 0; i < survey.counts.numRespondents; ++i) { //for each respondee
+        if(!(minAge <= survey.respondees[i].age              //if respondee is not above minAge
+            && survey.respondees[i].age <= maxAge) ) {       //or below maxAge, set filterMap to 0
+            filterMap[i] = 0;
+        }
     }
 }
 
-int* filterSurvey(Survey* survey) {
-    Filter filter = newBlankFilter();
-    int filteredOutRespondents = 0;
 
 
-    int* filterMap = emalloc(sizeof(int)*survey->counts.numRespondents);
-    for (int j = 0; j < survey->counts.numRespondents; ++j) {
+
+
+/** CREATE FILTER MAP:
+ * Creates a filter map based on the filter input and respondee information
+ *
+ * @param survey the survey to be filtered
+ * @return filterMap the filter map to be modified
+ */
+int* createFilterMap(Survey* survey) {
+    Filter filter = newBlankFilter(); //create a new blank filter
+    int filteredOutRespondents = 0;   //default value for filtered out respondents
+
+
+    int* filterMap = emalloc(sizeof(int)*survey->counts.numRespondents); //allocate memory for filter map
+    for (int j = 0; j < survey->counts.numRespondents; ++j) {            //initialize filter map to all 1s
         filterMap[j] = 1;
     }
 
+    /* TOKENIZATION */
     int i = 0;
     while(i < 3) {
-        char buffer[MAX_LINE_LEN]="-1";
-        readLine(buffer);
+        char buffer[MAX_LINE_LEN]="-1"; //set default value for buffer
+        readLine(buffer);               //store stdin line to buffer
 
         if(strcmp(buffer, "-1")==0) {   //if buffer did not get modified since at EOF
             break;
         }
 
-        editFilter(&filter, buffer);
+        editFilter(&filter, buffer);   //if buffer was modified, filter was found, then edit filter based on buffer
 
         i++;
     }
 
-    if(!filter.filterProgram && !filter.filterFromCan && !filter.filterAge) {
+    if(!filter.filterProgram && !filter.filterFromCan && !filter.filterAge) { //if no filter was found, return filterMap
         return filterMap;
     }
 
     if(filter.filterProgram) {
-        filterProgram(filterMap, filter.program, *survey);
+        filterProgram(filterMap, filter.program, *survey);         //if program filter was found filter by program
     }
 
     if(filter.filterFromCan) {
-        filterFromCan(filterMap, filter.fromCan, *survey);
+        filterFromCan(filterMap, filter.fromCan, *survey);         //if fromCan filter was found filter by fromCan
     }
 
     if(filter.filterAge) {
-        filterAge(filterMap, filter.minAge, filter.maxAge, *survey);
+        filterAge(filterMap, filter.minAge, filter.maxAge, *survey);//if age filter was found filter by age
     }
 
-    for (int i = 0; i < survey->counts.numRespondents; ++i) {
+    for (int i = 0; i < survey->counts.numRespondents; ++i) {       //count number of filtered out respondents
         if(filterMap[i]==0) filteredOutRespondents++;
     }
 
-    survey->counts.numFilteredOutRespondents = filteredOutRespondents;
-    survey->counts.numValidRespondents = survey->counts.numRespondents - filteredOutRespondents;
+    survey->counts.numFilteredOutRespondents = filteredOutRespondents;//set number of filtered out respondents
+    survey->counts.numValidRespondents = survey->counts.numRespondents - filteredOutRespondents;//set number of valid respondents
 
-    freeFilter(filter);
+    freeFilter(filter); //free filter struct
 
     return filterMap;
 }
