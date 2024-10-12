@@ -46,6 +46,7 @@ struct counts {
     int numLikerts;
     int numRespondents;
     int numFilteredOutRespondents;
+    int numValidRespondents;
 };
 typedef struct counts Counts;
 

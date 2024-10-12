@@ -14,6 +14,11 @@ void *emalloc(const size_t n) {
 }
 
 
+
+
+
+
+
 void freeRespondee(const struct respondee respondee, const int numQuestions) {
     free(respondee.program);
     for (int i = 0; i < numQuestions; ++i) {
@@ -23,20 +28,15 @@ void freeRespondee(const struct respondee respondee, const int numQuestions) {
 }
 
 
-void freeRespondeeTokens(char **respondeeTokens, int numRespondeeTokens) {
-    for (int j = 0; j < numRespondeeTokens; ++j) {
-        free(respondeeTokens[j]);
-    }
-    free(respondeeTokens);
+
+void freeFilter(Filter filter) {
+    free(filter.program);
 }
 
 
-void freeSummateArr(int** sumArr, const int numQuestions) {
-    for (int i = 0; i < numQuestions; ++i) {
-        free(sumArr[i]);
-    }
-    free(sumArr);
-}
+
+
+
 
 void free2dArr(void** arr, const int arrDepth) {
     for (int i = 0; i < arrDepth; ++i) {
@@ -67,6 +67,3 @@ void freeSurvey(Survey survey) {
 }
 
 
-void freeFilter(Filter filter) {
-    free(filter.program);
-}

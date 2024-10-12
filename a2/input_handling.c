@@ -208,7 +208,7 @@ int calculateAge(Date birthdate) {
     const Date curDate = tokenizeDate(dateStr);
     int age = curDate.year - birthdate.year;
 
-    if(curDate.month < birthdate.month || curDate.month == birthdate.month && curDate.day < birthdate.day) {
+    if(curDate.month < birthdate.month || ((curDate.month == birthdate.month) && (curDate.day < birthdate.day))) {
         age--;
     }
 
@@ -283,6 +283,7 @@ Survey readSurvey() {
 
     survey.counts.numRespondents = readNumResponses();
     survey.counts.numFilteredOutRespondents =0;
+    survey.counts.numValidRespondents = survey.counts.numRespondents;
 
     survey.respondees = readResponses(survey.counts.numRespondents);
 
@@ -407,6 +408,7 @@ int* filterSurvey(Survey* survey) {
     }
 
     survey->counts.numFilteredOutRespondents = filteredOutRespondents;
+    survey->counts.numValidRespondents = survey->counts.numRespondents - filteredOutRespondents;
 
     freeFilter(filter);
 
