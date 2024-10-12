@@ -5,7 +5,7 @@
 void printIntro(int numRespondents);
 void printQuestionsWithRPF(float** rpfArr, Survey survey);
 void printResponseCatScores(float** catScores, int numRespondents);
-void printAvgCatScores(float * avgCatScores);
+void printAvgCatScores(double * avgCatScores);
 
 
 #endif

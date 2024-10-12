@@ -36,7 +36,7 @@ void printResponseCatScores(const float** catScores, const int numRespondents) {
     }
 }
 
-void printAvgCatScores(const float * avgCatScores) {
+void printAvgCatScores(const double * avgCatScores) {
     printf("\nAVERAGE SCORES PER RESPONDENT\n\n");
-    printf("C:%.2f,I:%.2f,G:%.2f,U:%.2f,P:%.2f\n",avgCatScores[0],avgCatScores[1],avgCatScores[2],avgCatScores[3],avgCatScores[4]);
+    printf("C:%.2lf,I:%.2lf,G:%.2lf,U:%.2lf,P:%.2lf\n",avgCatScores[0],avgCatScores[1],avgCatScores[2],avgCatScores[3],avgCatScores[4]);
 }

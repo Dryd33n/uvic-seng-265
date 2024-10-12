@@ -175,6 +175,8 @@ char** tokenizeRespondee(char* buffer, const int numTokens) {
         i++;
     }
 
+
+
     return respondeeTokens;
 }
 
@@ -206,7 +208,7 @@ int calculateAge(Date birthdate) {
     const Date curDate = tokenizeDate(dateStr);
     int age = curDate.year - birthdate.year;
 
-    if(curDate.month < birthdate.month || ((curDate.month == birthdate.month) && (curDate.day < birthdate.day))) {
+    if(curDate.month < birthdate.month || curDate.month == birthdate.month && curDate.day < birthdate.day) {
         age--;
     }
 
@@ -224,21 +226,19 @@ Respondee constructRespondent(char buffer[MAX_LINE_LEN]) {
     respondee.program = emalloc(sizeof(char) * (strlen(respondeeTokens[0])+1));
     strcpy(respondee.program, respondeeTokens[0]);
 
-    respondee.fromCanada = (strcmp(respondeeTokens[1], "yes") == 0);
+    respondee.fromCanada = strcmp(respondeeTokens[1], "yes") == 0;
 
     respondee.birthday = tokenizeDate(respondeeTokens[2]);
 
     respondee.age = calculateAge(respondee.birthday);
 
     respondee.response = emalloc(sizeof(char *) * (numRespondeeTokens -3));
-    for (int i = 0; i < (numRespondeeTokens-3); ++i) {
+    for (int i = 0; i < numRespondeeTokens-3; ++i) {
         respondee.response[i] = emalloc(sizeof(char)*(strlen(respondeeTokens[i+3])+1));
         strcpy(respondee.response[i],respondeeTokens[i+3]);
     }
 
-
-
-    freeRespondeeTokens(respondeeTokens, numRespondeeTokens);
+    free2dArr((void**)respondeeTokens, numRespondeeTokens);
     return respondee;
 }
 
@@ -324,7 +324,7 @@ void editFilter(Filter *filter, char* filterStr) {
                     return;
                 case 1:
                     filter->filterFromCan = true;
-                    filter->fromCan = (strcmp("yes", token)==0);
+                    filter->fromCan = strcmp("yes", token)==0;
                     return;
                 case 2:
                     filter->filterAge = true;
@@ -344,7 +344,7 @@ void editFilter(Filter *filter, char* filterStr) {
 }
 
 
-void filterProgram(int* filterMap, char* program, Survey survey) {
+void filterProgram(int* filterMap, const char* program, Survey survey) {
     for (int i = 0; i < survey.counts.numRespondents; ++i) {
         if(strcmp(program, survey.respondees[i].program)!=0){ filterMap[i] = 0;}
     }
@@ -358,7 +358,7 @@ void filterFromCan(int* filterMap, bool fromCan, Survey survey) {
 
 void filterAge(int* filterMap, int minAge, int maxAge, Survey survey) {
     for (int i = 0; i < survey.counts.numRespondents; ++i) {
-        if(!((minAge <= survey.respondees[i].age) && (survey.respondees[i].age <= maxAge) )){ filterMap[i] = 0;}
+        if(!(minAge <= survey.respondees[i].age && survey.respondees[i].age <= maxAge) ){ filterMap[i] = 0;}
     }
 }
 
@@ -407,6 +407,8 @@ int* filterSurvey(Survey* survey) {
     }
 
     survey->counts.numFilteredOutRespondents = filteredOutRespondents;
+
+    freeFilter(filter);
 
     return filterMap;
 }

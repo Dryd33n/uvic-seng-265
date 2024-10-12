@@ -14,7 +14,7 @@
 int likertToVal(const char * likertStr,
                 char** likerts)
 {
-    char* cleanLikert = emalloc(sizeof(char)*(strlen(likertStr+1)));
+    char* cleanLikert = emalloc(sizeof(char)*(strlen(likertStr)+1));
     strcpy(cleanLikert,likertStr);
     cleanLikert[strcspn(cleanLikert, "\n")] = 0;
 
@@ -85,14 +85,14 @@ int** summateResponses(const Respondee* respondees,
  * Makes and calculates the relative percentual frequency array from the sum of each time a likert was chosen
  */
 float** makeRPFArr(int** responseSum, Counts counts) {
-    float** rpfArr = emalloc(sizeof(float*)*(counts.numQuestions));
+    float** rpfArr = emalloc(sizeof(float*)*counts.numQuestions);
     for (int i = 0; i < counts.numQuestions; ++i) {
         rpfArr[i] = emalloc(sizeof(float) * counts.numLikerts);
     }
 
     for (int i = 0; i < counts.numQuestions; ++i) {   //for each question
         for (int j = 0; j < 6; ++j) {           //for each likert sum for question i
-            rpfArr[i][j] = ((float)responseSum[i][j] / (float)(counts.numRespondents - counts.numFilteredOutRespondents)) * 100;
+            rpfArr[i][j] = (float)responseSum[i][j] / (float)(counts.numRespondents - counts.numFilteredOutRespondents) * 100;
         }
     }
 
@@ -127,23 +127,27 @@ float ** getRpfArr(const Survey survey, int* filterMap) {
  * Computes the responses score array from the respondees array from which likerts where chosen and their
  * corresponding values
  */
-int** computeResponsesScoreArr(const Respondee * respondees,
-                              const Question * questions,
-                              char** likerts,
-                              const Counts counts) {
-    int** responseScores = emalloc(sizeof(int *) * counts.numQuestions);
-    for (int i = 0; i < counts.numQuestions; ++i) {
-        responseScores[i] = emalloc(sizeof(int) * counts.numRespondents);
+int** computeResponsesScoreArr(const Survey survey, const int* filterMap) {
+    int numValidRespondents = survey.counts.numRespondents - survey.counts.numFilteredOutRespondents;
+
+    int** responseScores = emalloc(sizeof(int *) * survey.counts.numQuestions);
+    for (int i = 0; i <survey. counts.numQuestions; ++i) {
+        responseScores[i] = emalloc(sizeof(int) * numValidRespondents);
     }
 
-    for (int i = 0; i < counts.numRespondents; ++i) {      //for each respondent's response
-        for (int j = 0; j < counts.numQuestions; ++j) {   //for each question answered by respondent i
-            const int likertVal = likertToVal(respondees[i].response[j], likerts); //convert likert string to respective value
-            int likertValDirected = likertVal;
-            if(!questions[j].directDirection) { //if question is reverse directed then reverse the value
-                likertValDirected = 7 - likertVal;
+    int counter = 0;
+    for (int i = 0; i < survey.counts.numRespondents; ++i) {      //for each respondent's response
+        if(filterMap[i] == 1){
+            for (int j = 0; j < survey.counts.numQuestions; ++j) {   //for each question answered by respondent i
+                const int likertVal = likertToVal(survey.respondees[i].response[j], survey.likerts); //convert likert string to respective value
+                int likertValDirected = likertVal;
+                if(!survey.questions[j].directDirection) { //if question is reverse directed then reverse the value
+                    likertValDirected = 7 - likertVal;
+                }
+                responseScores[j][counter] = likertValDirected;
             }
-            responseScores[j][i] = likertValDirected;
+
+            counter++;
         }
     }
 
@@ -161,25 +165,24 @@ int** computeResponsesScoreArr(const Respondee * respondees,
  * @param questions array of questions
  * @param numRespondents integer containing the number of respondents
  */
-float** makeResponsesCatScoreArr(int** responsesScores,
-                              const Question * questions,
-                              const Counts counts) {
+float** makeResponsesCatScoreArr(int** responsesScores, Survey survey) {
+    const int validRespondents = survey.counts.numRespondents - survey.counts.numFilteredOutRespondents;
     float** responsesCatScores = emalloc(sizeof(float*)*5);
-    for (int i = 0; i < counts.numRespondents; ++i) {
-        responsesCatScores[i] = emalloc(sizeof(float)*counts.numRespondents);
+    for (int i = 0; i < 5; ++i) {
+        responsesCatScores[i] = emalloc(sizeof(float)*validRespondents);
     }
 
 
-    for (int i = 0; i < counts.numRespondents; ++i) {                  //for each respondent
+    for (int i = 0; i < validRespondents; ++i) {                  //for each respondent
         char* cats[5] = {"C","I","G","U","P"};
         int catCount[5]={0,0,0,0,0};
         int catSum[5]={0,0,0,0,0};
 
-        for (int j = 0; j < counts.numQuestions; ++j) {               //for each question answered for respondent i
+        for (int j = 0; j < survey.counts.numQuestions; ++j) {               //for each question answered for respondent i
             int cat=-1;
 
             for (int k = 0; k < 5; ++k) {
-                if(strcmp(cats[k], questions[j].category) == 0) {
+                if(strcmp(cats[k], survey.questions[j].category) == 0) {
                     cat = k;
                 }
             }
@@ -197,9 +200,9 @@ float** makeResponsesCatScoreArr(int** responsesScores,
     return responsesCatScores;
 }
 
-float** getCatScoreArr(const Survey survey) {
-    int** responseScoreArr = computeResponsesScoreArr(survey.respondees,survey.questions,survey.likerts,survey.counts);
-    float** catScoreArr = makeResponsesCatScoreArr(responseScoreArr,survey.questions,survey.counts);
+float** getCatScoreArr(const Survey survey, const int* filterMap) {
+    int** responseScoreArr = computeResponsesScoreArr(survey, filterMap);
+    float** catScoreArr = makeResponsesCatScoreArr(responseScoreArr, survey);
 
     free2dArr((void**)responseScoreArr, survey.counts.numQuestions);
 
@@ -216,15 +219,16 @@ float** getCatScoreArr(const Survey survey) {
 
 
 
-float* getAvgCatScores(float** catScores, const Counts counts) {
-    float* avgCatScores = emalloc(sizeof(float) * 5);
+double* getAvgCatScores(float** catScores, const Counts counts) {
+    double* avgCatScores = emalloc(sizeof(double) * 5);
+    int validRespondents = counts.numRespondents - counts.numFilteredOutRespondents;
 
     for (int i = 0; i < 5; ++i) {      //for each category score
         float catSum = 0;
-        for (int j = 0; j < counts.numRespondents; ++j) {  //for each respondent's category score for category i
+        for (int j = 0; j < validRespondents; ++j) {  //for each respondent's category score for category i
             catSum += catScores[i][j];
         }
-        avgCatScores[i] = catSum / (float)counts.numRespondents;    //compute average category score
+        avgCatScores[i] = (double)catSum / (double)validRespondents;    //compute average category score
     }
 
     return avgCatScores;

@@ -19,11 +19,11 @@ struct date {
 typedef struct date Date;
 
 struct respondee {
-    char* program;       //respondee program
-    bool fromCanada;        //is respondee from canada
+    char* program;      //respondee program
+    bool fromCanada;    //is respondee from canada
     Date birthday;      //respondee birthday
     int age;
-    char** response;  //respondee responses stored as strings
+    char** response;    //respondee responses stored as strings
 };
 typedef struct respondee Respondee;
 
