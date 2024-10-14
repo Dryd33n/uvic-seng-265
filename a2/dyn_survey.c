@@ -1,15 +1,15 @@
-// INCLUDE LIBRARIES
-#include <stdio.h>
-
-
-// INCLUDE LOCAL HEADERS
-#include <stdlib.h>
-
+//HEADER INCLUSIONS
 #include "dyn_survey.h"
 #include "input_handling.h"
 #include "output.h"
 #include "processing.h"
 #include "emalloc.h"
+
+
+//LIBRARY INCLUSIONS
+#include <stdlib.h>
+#include <stdio.h>
+
 
 
 

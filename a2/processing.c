@@ -1,9 +1,21 @@
+//HEADER INCLUSIONS
+#include "emalloc.h"
+#include "input_handling.h"
+
+//LIBRARY INCLUSIONS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "emalloc.h"
-#include "input_handling.h"
+
+
+/*              ╔═══════════════════════╗
+ *              ║        HELPERS        ║
+ *              ╚═══════════════════════╝
+ */
+
+
+
 /**LIKERT TO VAL:
  *
  * Converts a given likert string to a value
@@ -35,19 +47,21 @@ int likertToVal(const char * likertStr,
 
 
 
-
-
-
+/*              ╔══════════════════════════════════════════════════════╗
+ *              ║       RELATIVE PERCENTUAL FREQUENCIES HELPERS        ║
+ *              ╚══════════════════════════════════════════════════════╝
+ */
 
 
 
 /**SUMMATE RESPONSES:
  *
- * Summate the number of times each likert was chosen for each question
- * @param respondees array of respondee structs
- * @param numRespondents integer containing the number of respondents
- * @param numQuestions
+ * Summates the responses for each likert for each question
+ * @param respondees array of respondees
  * @param likerts array of likerts
+ * @param counts struct containing the number of questions, likerts, and respondents
+ * @param filterMap array of integers containing the filter map
+ * @return returns the 2D array containing the sum of each likert for each question
  */
 int** summateResponses(const Respondee* respondees,
                        char** likerts,
@@ -80,9 +94,13 @@ int** summateResponses(const Respondee* respondees,
 
 
 
-/**MAKE RELATIVE PERCENTUAL FREQUENCY ARRAY:
+
+/**MAKE RELATIVE PERCENTUAL FREQUENCIES ARRAY:
  *
- * Makes and calculates the relative percentual frequency array from the sum of each time a likert was chosen
+ * Makes the relative percentual frequencies array from the responses sum array
+ * @param responseSum 2D array containing the sum of each likert for each question
+ * @param counts struct containing the number of questions, likerts, and respondents
+ * @return returns the relative percentual frequencies array
  */
 float** makeRPFArr(int** responseSum, Counts counts) {
     float** rpfArr = emalloc(sizeof(float*)*counts.numQuestions);
@@ -99,25 +117,16 @@ float** makeRPFArr(int** responseSum, Counts counts) {
     return rpfArr;
 }
 
-float ** getRpfArr(const Survey survey, int* filterMap) {
-    int** summateArr = summateResponses(survey.respondees, survey.likerts, survey.counts, filterMap);
-    float** rpfArr   = makeRPFArr(summateArr, survey.counts);
-
-    free2dArr((void**)summateArr, survey.counts.numQuestions);
-
-    return rpfArr;
-}
 
 
 
 
 
 
-
-
-
-
-
+/*              ╔══════════════════════════════════════╗
+ *              ║       CATEGORY SCORES HELPERS        ║
+ *              ╚══════════════════════════════════════╝
+ */
 
 
 
@@ -153,17 +162,15 @@ int** computeResponsesScoreArr(const Survey survey, const int* filterMap) {
 
     return responseScores;
 }
-//
-//
-//
+
+
+
 /**MAKE RESPONSES CATEGORY SCORE ARRAY:
  *
- * Makes the responses category score array from the responses score array by averaging the scores of each category
- * for each respondent
- * @param responsesCatScores 2D array to store the responses category scores
- * @param responsesScores 2D array containing the responses scores
- * @param questions array of questions
- * @param numRespondents integer containing the number of respondents
+ * Makes the responses category score array from the responses score array
+ * @param responsesScores 2D array containing the score of each response for each question
+ * @param survey the survey struct containing the questions
+ * @return returns the responses category score array
  */
 float** makeResponsesCatScoreArr(int** responsesScores, Survey survey) {
     const int validRespondents = survey.counts.numRespondents - survey.counts.numFilteredOutRespondents;
@@ -200,6 +207,52 @@ float** makeResponsesCatScoreArr(int** responsesScores, Survey survey) {
     return responsesCatScores;
 }
 
+
+
+
+
+
+
+
+
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ *
+ *                           ╔══════════════════════════════╗
+ *                           ║  MAIN PROCESSING FUNCTIONS   ║
+ *                           ╚══════════════════════════════╝
+ *
+ *░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
+
+
+/**GET RELATIVE PERCENTUAL FREQUENCIES ARRAY:
+ *
+ * Gets the relative percentual frequencies array from the survey
+ * @param survey the survey struct containing the questions, likerts, respondees, and counts
+ * @param filterMap the filter map array
+ * @return returns the relative percentual frequencies array
+ */
+float ** getRpfArr(const Survey survey, int* filterMap) {
+    int** summateArr = summateResponses(survey.respondees, survey.likerts, survey.counts, filterMap);
+    float** rpfArr   = makeRPFArr(summateArr, survey.counts);
+
+    free2dArr((void**)summateArr, survey.counts.numQuestions);
+
+    return rpfArr;
+}
+
+
+
+
+
+/**GET CATEGORY SCORE ARRAY:
+ *
+ * Gets the category score array from the survey
+ * @param survey the survey struct containing the questions, likerts, respondees, and counts
+ * @param filterMap the filter map array
+ * @return returns the category score array
+ */
 float** getCatScoreArr(const Survey survey, const int* filterMap) {
     int** responseScoreArr = computeResponsesScoreArr(survey, filterMap);
     float** catScoreArr = makeResponsesCatScoreArr(responseScoreArr, survey);
@@ -212,13 +265,13 @@ float** getCatScoreArr(const Survey survey, const int* filterMap) {
 
 
 
-
-
-
-
-
-
-
+/**GET AVG CATEGORY SCORES:
+ *
+ * Gets the average category scores from the category scores array
+ * @param catScores the category scores array
+ * @param counts the counts struct containing the number of questions, likerts, and respondents
+ * @return returns the average category scores array
+ */
 double* getAvgCatScores(float** catScores, const Counts counts) {
     double* avgCatScores = emalloc(sizeof(double) * 5);
     int validRespondents = counts.numRespondents - counts.numFilteredOutRespondents;
@@ -233,4 +286,8 @@ double* getAvgCatScores(float** catScores, const Counts counts) {
 
     return avgCatScores;
 }
+
+
+
+
 

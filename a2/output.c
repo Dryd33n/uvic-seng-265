@@ -1,6 +1,9 @@
+//HEADER INCLUSIONS
+#include "dyn_survey.h"
+
+//LIBRARY INCLUSIONS
 #include <stdio.h>
 
-#include "dyn_survey.h"
 
 /** PRINT INTRO:
  *
@@ -14,6 +17,15 @@ void printIntro(const int numRespondents) {
 }
 
 
+
+
+
+/** PRINT QUESTIONS WITH RELATIVE PERCENTUAL FREQUENCIES:
+ *
+ * Prints the questions with their relative percentual frequencies
+ * @param rpfArr 2D array containing the relative percentual frequencies
+ * @param survey struct containing the survey data
+ */
 void printQuestionsWithRPF(float** rpfArr, const Survey survey) {
     printf("\nFOR EACH QUESTION BELOW, RELATIVE PERCENTUAL FREQUENCIES ARE COMPUTED FOR EACH LEVEL OF AGREEMENT");
 
@@ -28,6 +40,16 @@ void printQuestionsWithRPF(float** rpfArr, const Survey survey) {
     printf("\n");
 }
 
+
+
+
+
+/** PRINT RESPONSE CATEGORY SCORES:
+ *
+ * Prints the category scores for each respondent
+ * @param catScores 2D array containing the category scores
+ * @param numRespondents integer containing the number of respondents
+ */
 void printResponseCatScores(const float** catScores, const int numRespondents) {
     printf("\nSCORES FOR ALL THE RESPONDENTS\n\n");
 
@@ -36,6 +58,15 @@ void printResponseCatScores(const float** catScores, const int numRespondents) {
     }
 }
 
+
+
+
+
+/** PRINT AVERAGE CATEGORY SCORES:
+ *
+ * Prints the average category scores for all respondents
+ * @param avgCatScores array containing the average category scores
+ */
 void printAvgCatScores(const double * avgCatScores) {
     printf("\nAVERAGE SCORES PER RESPONDENT\n\n");
     printf("C:%.2lf,I:%.2lf,G:%.2lf,U:%.2lf,P:%.2lf\n",avgCatScores[0],avgCatScores[1],avgCatScores[2],avgCatScores[3],avgCatScores[4]);

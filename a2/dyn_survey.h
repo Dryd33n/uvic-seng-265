@@ -2,7 +2,11 @@
 #define _DYN_SURVEY_H_
 #include <stdbool.h>
 
-/* add your library includes, constants and typedefs here*/
+/*              ╔══════════════════════════════════╗
+ *              ║             STRUCTS              ║
+ *              ╚══════════════════════════════════╝
+ */
+
 struct question {
     char* question;     //question content string;
     _Bool directDirection;  //true = direct, false = reverse, true = default
@@ -10,13 +14,16 @@ struct question {
 };
 typedef struct question Question;
 
+
+
 struct date {
     int year;
     int month;
     int day;
 };
-
 typedef struct date Date;
+
+
 
 struct respondee {
     char* program;      //respondee program
@@ -27,11 +34,15 @@ struct respondee {
 };
 typedef struct respondee Respondee;
 
+
+
 struct readQuestionRes {
     Question* questions;
     int numQuestions;
 };
 typedef struct readQuestionRes rqr;
+
+
 
 struct readLikertRes {
     char** likerts;
@@ -49,6 +60,8 @@ struct counts {
     int numValidRespondents;
 };
 typedef struct counts Counts;
+
+
 
 struct survey {
     Question* questions;
