@@ -10,7 +10,6 @@ class Note:
     def __eq__(self, other):
         return (self.code == other.code
                 and self.text == other.text)
-                #and self.timeStamp == other.timeStamp)
 
     def __repr__(self):
         return f"Note ({self.code}) from {self.timeStamp}: {self.text}"

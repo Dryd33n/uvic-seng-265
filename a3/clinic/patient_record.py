@@ -25,7 +25,7 @@ class PatientRecord:
 
         return note
 
-    def retrieve_notes(self, search: str):
+    def retrieve_notes(self, search: str) -> List[Note]:
         return sorted([n for n in self.records if (search in n.text)], key=lambda n: n.code)
 
     def update_note(self, code: int, msg: str) -> bool:
@@ -37,7 +37,7 @@ class PatientRecord:
         else:
             return False
 
-    def delete(self, code: int):
+    def delete(self, code: int) -> bool:
         note = self.search_note(code)
 
         if note:
