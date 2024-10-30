@@ -1,3 +1,6 @@
+from typing import Optional
+
+from clinic.note import Note
 from clinic.patient_record import *
 
 
@@ -43,5 +46,20 @@ class Patient:
         self.email = email
         self.address = address
 
-    def get_phn(self) -> int:
-        return self.phn
+    def create_note(self, msg: str) -> Note:
+        return self.record.create_note(msg)
+
+    def search_note(self, code: int) -> Note:
+        return self.record.search_note(code)
+
+    def retrieve_notes(self, search: str) -> List[Note]:
+        return self.record.retrieve_notes(search)
+
+    def update_note(self, code: int, msg: str) -> bool:
+        return self.record.update_note(code, msg)
+
+    def delete_note(self, code: int) -> bool:
+        return self.record.delete(code)
+
+    def list_notes(self) -> List[Note]:
+        return self.record.list_notes()

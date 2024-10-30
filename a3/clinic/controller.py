@@ -1,5 +1,6 @@
 from typing import List, Union, Optional
 
+from clinic.note import Note
 from clinic.patient import Patient
 
 
@@ -73,12 +74,11 @@ class Controller:
         if not self.isLogged and self.patients is None:
             return False
 
-
-                                            # ensure new phn is not already in use except by the updated patient
+                                                # ensure new phn is not already in use except by the updated patient
         patient = (self.search_patient(phn) if (not any(new_phn == p_.phn for p_ in self.patients if p_.phn != phn)
-                                            # ensure iterated patient is not current patient
-                                            and (self.currentPatient is None or phn != self.currentPatient.phn))
-                                            else None)
+                                                # ensure iterated patient is not current patient
+                                                and (self.currentPatient is None or phn != self.currentPatient.phn))
+                   else None)
 
         if patient:
             new_info = (new_phn, new_name, new_dob, new_phone, new_email, new_addr)
@@ -122,20 +122,40 @@ class Controller:
         if self.isLogged:
             self.currentPatient = None
 
-    def create_note(self, param):
-        pass
+    def create_note(self, msg: str) -> Optional[Note]:
+        if not self.isLogged or self.currentPatient is None:
+            return None
 
-    def search_note(self, param):
-        pass
+        return self.currentPatient.create_note(msg)
 
-    def retrieve_notes(self, param):
-        pass
+    def search_note(self, code: int) -> Optional[Note]:
+        if not self.isLogged or self.currentPatient is None:
+            return None
 
-    def delete_note(self, param):
-        pass
+        return self.currentPatient.search_note(code)
 
-    def list_notes(self):
-        pass
+    def retrieve_notes(self, search: str) -> Optional[List[Note]]:
+        if not self.isLogged or self.currentPatient is None:
+            return None
 
-    def update_note(self, param, param1):
-        pass
+        return self.currentPatient.retrieve_notes(search)
+
+    def update_note(self, code: int, msg: str) -> bool:
+        if not self.isLogged or self.currentPatient is None:
+            return False
+
+        return self.currentPatient.update_note(code, msg)
+
+    def delete_note(self, code: int) -> bool:
+        if not self.isLogged or self.currentPatient is None:
+            return False
+
+        return self.currentPatient.delete_note(code)
+
+    def list_notes(self) -> Optional[List[Note]]:
+        if not self.isLogged or self.currentPatient is None:
+            return None
+
+        return self.currentPatient.list_notes()
+
+
