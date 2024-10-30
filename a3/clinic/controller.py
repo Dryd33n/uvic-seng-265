@@ -73,14 +73,12 @@ class Controller:
         if not self.isLogged and self.patients is None:
             return False
 
-            # for all patients in the list of patients
-        patient = next((p for p in self.patients
-                        # ensure that iterated patient matches phn being updated
-                        if p.phn == phn
-                        # ensure new phn is not already in use except by the updated patient
-                        and not any(new_phn == p_.phn for p_ in self.patients if p_.phn != phn)
-                        # ensure iterated patient is not current patient
-                        and (self.currentPatient is None or phn != self.currentPatient.phn)), None)
+
+                                            # ensure new phn is not already in use except by the updated patient
+        patient = (self.search_patient(phn) if (not any(new_phn == p_.phn for p_ in self.patients if p_.phn != phn)
+                                            # ensure iterated patient is not current patient
+                                            and (self.currentPatient is None or phn != self.currentPatient.phn))
+                                            else None)
 
         if patient:
             new_info = (new_phn, new_name, new_dob, new_phone, new_email, new_addr)
@@ -93,7 +91,7 @@ class Controller:
         if not self.isLogged:
             return False
 
-        patient = next((p for p in self.patients if (p.phn == phn and phn != self.currentPatient.phn)), None)
+        patient = self.search_patient(phn) if (self.currentPatient is None or phn != self.currentPatient.phn) else None
 
         if patient:
             self.patients.remove(patient)
@@ -113,7 +111,7 @@ class Controller:
         if not self.isLogged:
             return False
 
-        patient = next((p for p in self.patients if p.phn == phn), None)
+        patient = self.search_patient(phn)
 
         if patient:
             self.currentPatient = patient
