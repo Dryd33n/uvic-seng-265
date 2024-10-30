@@ -2,6 +2,7 @@ from typing import List, Union, Optional
 
 from clinic.patient import Patient
 
+
 class Controller:
 
     def __init__(self):
@@ -9,6 +10,7 @@ class Controller:
         self.currentUser = None
         self.users = {"user": "clinic2024"}
         self.patients: List[Patient] = []
+        self.currentPatient: Patient = None
 
     def logout(self):
         if self.isLogged:
@@ -40,7 +42,7 @@ class Controller:
                        email: str,
                        addr: str) -> Optional[Patient]:
         if (not self.isLogged or
-            phn in [p.phn for p in self.patients]):
+                phn in [p.phn for p in self.patients]):
             return None
 
         patientInfo = (phn, name, dob, phone, email, addr)
@@ -52,13 +54,13 @@ class Controller:
         if not self.isLogged:
             return None
 
-        retrieved_list: List[Patient] = []
+        return [p for p in self.patients if name_search in p.name]
 
-        for pat in self.patients:
-            if name_search in pat.name:
-                retrieved_list.append(pat)
+    def search_patient(self, phn: int) -> Optional[Patient]:
+        if not self.isLogged:
+            return None
 
-        return retrieved_list
+        return next((p for p in self.patients if p.phn == phn), None)
 
     def update_patient(self,
                        phn: int,
@@ -71,37 +73,56 @@ class Controller:
         if not self.isLogged and self.patients is None:
             return False
 
-        if ((p := self.search_patient(phn)) is not None and
-            new_phn not in [pat.phn for pat in self.patients if pat.phn != phn]):
+            # for all patients in the list of patients
+        patient = next((p for p in self.patients
+                        # ensure that iterated patient matches phn being updated
+                        if p.phn == phn
+                        # ensure new phn is not already in use except by the updated patient
+                        and not any(new_phn == p_.phn for p_ in self.patients if p_.phn != phn)
+                        # ensure iterated patient is not current patient
+                        and (self.currentPatient is None or phn != self.currentPatient.phn)), None)
 
+        if patient:
             new_info = (new_phn, new_name, new_dob, new_phone, new_email, new_addr)
-            p.update(*new_info)
+            patient.update(*new_info)
             return True
+        else:
+            return False
 
-        return False
+    def delete_patient(self, phn: int) -> Optional[bool]:
+        if not self.isLogged:
+            return False
 
+        patient = next((p for p in self.patients if (p.phn == phn and phn != self.currentPatient.phn)), None)
 
-
-    def get_current_patient(self):
-        pass
+        if patient:
+            self.patients.remove(patient)
+            return True
+        else:
+            return None
 
     def list_patients(self):
-        pass
+        if self.isLogged:
+            return self.patients
 
-    def delete_patient(self, param):
-        pass
+    def get_current_patient(self):
+        if self.isLogged:
+            return self.currentPatient
 
-    def search_patient(self, phn: int) -> Optional[Patient]:
-        for p in self.patients:
-            if p.phn == phn:
-                return p
+    def set_current_patient(self, phn: int):
+        if not self.isLogged:
+            return False
 
-        return None
+        patient = next((p for p in self.patients if p.phn == phn), None)
 
+        if patient:
+            self.currentPatient = patient
+        else:
+            return False
 
-
-    def set_current_patient(self, param):
-        pass
+    def unset_current_patient(self):
+        if self.isLogged:
+            self.currentPatient = None
 
     def create_note(self, param):
         pass
