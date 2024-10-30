@@ -1,7 +1,9 @@
 from unittest import TestCase
-from clinic.controller import *
-from clinic.note import *
-from clinic.patient import *
+from unittest import main
+from clinic.controller import Controller
+from clinic.patient import Patient
+from clinic.patient_record import PatientRecord
+from clinic.note import Note
 
 
 class IntegrationTests(TestCase):
@@ -10,26 +12,21 @@ class IntegrationTests(TestCase):
         self.controller = Controller()
 
     def test_login_logout(self):
-        self.controller.logout()
-        self.assertFalse(self.controller.is_logged(), "log out only after being logged in")
+        self.assertFalse(self.controller.logout(), "log out only after being logged in")
 
-        self.controller.login("theuser", "clinic2024")
-        self.assertFalse(self.controller.is_logged(), "login in with incorrect username")
+        self.assertFalse(self.controller.login("theuser", "clinic2024"), "login in with incorrect username")
 
-        self.controller.login("user", "123456")
-        self.assertFalse(self.controller.is_logged(), "login in with incorrect password")
+        self.assertFalse(self.controller.login("user", "123456"), "login in with incorrect password")
 
-        self.controller.login("user", "clinic2024")
-        self.assertTrue(self.controller.is_logged(), "login correctly")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
 
-        self.controller.logout()
-        self.assertFalse(self.controller.is_logged(), "log out correctly")
+        self.assertFalse(self.controller.login("user", "clinic2024"), "cannot login again while still logged in")
 
-        self.controller.login("user", "clinic2024")
-        self.assertTrue(self.controller.is_logged(), "can login again")
+        self.assertTrue(self.controller.logout(), "log out correctly")
 
-        self.controller.logout()
-        self.assertFalse(self.controller.is_logged(), "can log out again")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "can login again")
+
+        self.assertTrue(self.controller.logout(), "can log out again")
 
     def test_create_search_patient(self):
         # some patients that will be created
@@ -47,7 +44,7 @@ class IntegrationTests(TestCase):
             "cannot create patient without logging in")
 
         # add one patient
-        self.controller.login("user", "clinic2024")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
         actual_patient = self.controller.create_patient(9790012000, "John Doe", "2000-10-10", "250 203 1010",
                                                         "john.doe@gmail.com", "300 Moss St, Victoria")
         self.assertIsNotNone(actual_patient, "patient created cannot be null")
@@ -116,7 +113,7 @@ class IntegrationTests(TestCase):
         self.assertIsNone(self.controller.retrieve_patients("John Doe"), "cannot retrieve patients without logging in")
 
         # login and create some patients
-        self.controller.login("user", "clinic2024")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
         self.controller.create_patient(9798884444, "Ali Mesbah", "1980-03-03", "250 301 6060", "mesbah.ali@gmail.com",
                                        "500 Fairfield Rd, Victoria")
         self.controller.create_patient(9792226666, "Jin Hu", "2002-02-28", "278 222 4545", "jinhu@outlook.com",
@@ -164,7 +161,7 @@ class IntegrationTests(TestCase):
             "cannot update patient without logging in")
 
         # login
-        self.controller.login("user", "clinic2024")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
 
         # try to update a patient when there are no patients in the system
         self.assertFalse(
@@ -209,6 +206,12 @@ class IntegrationTests(TestCase):
         self.assertEqual(actual_patient, expected_patient_5a,
                          "patient was updated, their data has to be updated and correct")
 
+        # update one patient with a conflicting existing personal health number
+        self.assertFalse(
+            self.controller.update_patient(9790014444, 9798884444, "Mary Doe", "1995-07-01", "250 203 2020",
+                                           "mary.doe@gmail.com", "300 Moss St, Victoria"),
+            "cannot update patient and give them a registered phn")
+
     def test_delete_patient(self):
         # some patients that may be deleted
         expected_patient_1 = Patient(9798884444, "Ali Mesbah", "1980-03-03", "250 301 6060", "mesbah.ali@gmail.com",
@@ -226,7 +229,7 @@ class IntegrationTests(TestCase):
         self.assertFalse(self.controller.delete_patient(9798884444), "cannot delete patient without logging in")
 
         # login
-        self.controller.login("user", "clinic2024")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
 
         # try to delete a patient when there are no patients in the system
         self.assertFalse(self.controller.delete_patient(9790012000),
@@ -273,7 +276,7 @@ class IntegrationTests(TestCase):
         self.assertIsNone(self.controller.list_patients(), "cannot list patients without logging in")
 
         # login
-        self.controller.login("user", "clinic2024")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
 
         # listing patients when there are no patients in the system
         patients_list = self.controller.list_patients()
@@ -336,7 +339,7 @@ class IntegrationTests(TestCase):
         self.assertIsNone(self.controller.get_current_patient(), "cannot get current patient without logging in")
 
         # login
-        self.controller.login("user", "clinic2024")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
 
         # add some patients
         self.controller.create_patient(9798884444, "Ali Mesbah", "1980-03-03", "250 301 6060", "mesbah.ali@gmail.com",
@@ -354,11 +357,35 @@ class IntegrationTests(TestCase):
         self.assertIsNone(self.controller.get_current_patient(),
                           "cannot get current patient without setting them first")
 
+        # cannot set a non-existent patient to be the current patient
+        self.controller.set_current_patient(9790010001)
+        self.assertIsNone(self.controller.get_current_patient(), "cannot get non-existent patient as current patient")
+
         # set one patient to be the current patient
         self.controller.set_current_patient(9790012000)
         actual_current_patient = self.controller.get_current_patient()
         self.assertIsNotNone(actual_current_patient)
         self.assertEqual(actual_current_patient, expected_patient_3, "expected current patient is patient 3")
+
+        # cannot delete the current patient, unset current patient first
+        self.assertFalse(self.controller.delete_patient(9790012000), "cannot delete the current patient")
+
+        # cannot update the current patient, unset current patient first
+        self.assertFalse(
+            self.controller.update_patient(9790012000, 9790012000, "John Doe", "2000-10-10", "278 999 4041",
+                                           "john.doe@hotmail.com", "205 Foul Bay Rd, Oak Bay"),
+            "cannot update the current patient")
+
+        # unset current patient
+        self.controller.unset_current_patient()
+        actual_current_patient = self.controller.get_current_patient()
+        self.assertIsNone(actual_current_patient)
+
+        # handle log out
+        self.controller.set_current_patient(9790012000)
+        self.controller.logout()
+        actual_current_patient = self.controller.get_current_patient()
+        self.assertIsNone(actual_current_patient)
 
     def test_create_note(self):
         # some notes that may be created
@@ -371,7 +398,7 @@ class IntegrationTests(TestCase):
                           "cannot add note without logging in")
 
         # login
-        self.controller.login("user", "clinic2024")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
 
         # cannot do operation without a valid current patient
         self.assertIsNone(self.controller.create_note("Patient comes with headache and high blood pressure."),
@@ -436,7 +463,7 @@ class IntegrationTests(TestCase):
         self.assertIsNone(self.controller.retrieve_notes("headache"), "cannot retrieve notes without logging in")
 
         # login
-        self.controller.login("user", "clinic2024")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
 
         # cannot do operation without a valid current patient
         self.assertIsNone(self.controller.retrieve_notes("headache"),
@@ -480,15 +507,15 @@ class IntegrationTests(TestCase):
         expected_note_5 = Note(5, "Patient says high BP is controlled, 120x80 in general.")
 
         # cannot do operation without logging in
-        self.assertIsNone(self.controller.update_note(3, "Patient is taking Losartan 50mg to control blood pressure."),
-                          "cannot retrieve notes without logging in")
+        self.assertFalse(self.controller.update_note(3, "Patient is taking Losartan 50mg to control blood pressure."),
+                         "cannot retrieve notes without logging in")
 
         # login
-        self.controller.login("user", "clinic2024")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
 
         # cannot do operation without a valid current patient
-        self.assertIsNone(self.controller.update_note(3, "Patient is taking Losartan 50mg to control blood pressure."),
-                          "cannot retrieve notes without a valid current patient")
+        self.assertFalse(self.controller.update_note(3, "Patient is taking Losartan 50mg to control blood pressure."),
+                         "cannot retrieve notes without a valid current patient")
 
         # add one patient and make it the current patient
         self.controller.create_patient(9792225555, "Joe Hancock", "1990-01-15", "278 456 7890",
@@ -534,13 +561,13 @@ class IntegrationTests(TestCase):
         expected_note_5 = Note(5, "Patient says high BP is controlled, 120x80 in general.")
 
         # cannot do operation without logging in
-        self.assertIsNone(self.controller.delete_note(3), "cannot delete note without logging in")
+        self.assertFalse(self.controller.delete_note(3), "cannot delete note without logging in")
 
         # login
-        self.controller.login("user", "clinic2024")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
 
         # cannot do operation without a valid current patient
-        self.assertIsNone(self.controller.delete_note(3), "cannot delete note without a valid current patient")
+        self.assertFalse(self.controller.delete_note(3), "cannot delete note without a valid current patient")
 
         # add one patient and make it the current patient
         self.controller.create_patient(9792225555, "Joe Hancock", "1990-01-15", "278 456 7890",
@@ -584,15 +611,19 @@ class IntegrationTests(TestCase):
         self.assertIsNone(self.controller.list_notes(), "cannot list notes for a patient without logging in")
 
         # login
-        self.controller.login("user", "clinic2024")
+        self.assertTrue(self.controller.login("user", "clinic2024"), "login correctly")
 
         # listing notes when there are no patients in the system
-        self.assertIsNone(self.controller.list_notes(), "cannot list notes for a patient without logging in")
+        self.assertIsNone(self.controller.list_notes(), "cannot list notes when there are no patients in the system")
 
         # add one patient and make it the current patient
         self.controller.create_patient(9792225555, "Joe Hancock", "1990-01-15", "278 456 7890",
                                        "john.hancock@outlook.com", "5000 Douglas St, Saanich")
         self.controller.set_current_patient(9792225555)
+
+        # listing notes when the current patient has no notes
+        notes_list = self.controller.list_notes()
+        self.assertEqual(len(notes_list), 0, "list of notes for patient has size 0")
 
         # listing notes in a singleton list
         actual_note = self.controller.create_note("Patient comes with headache and high blood pressure.")
