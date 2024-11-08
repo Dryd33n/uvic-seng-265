@@ -1,7 +1,8 @@
 from typing import List, Union, Optional, Dict
 import hashlib
-import os
+import json
 
+from clinic.dao.patient_dao_json import PatientDAOJSON
 from clinic.note import Note
 from clinic.patient import Patient
 
@@ -48,12 +49,19 @@ class Controller:
         Initialize the controller with the default values.
         :param autosave: 
         """
-        self.autosave = None
+        self.autosave = autosave
         self.isLogged = False
         self.currentUser = None
-        self.users = load_users('../clinic/users.txt')
+        self.users = {'user': '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
+                      'ali': '6394ffec21517605c1b426d43e6fa7eb0cff606ded9c2956821c2c36bfee2810',
+                      'kala': 'e5268ad137eec951a48a5e5da52558c7727aaa537c8b308b5e403e6b434e036'}
         self.patients: List[Patient] = []
         self.currentPatient: Patient = None
+
+        if self.autosave:
+            self.patient_dao = PatientDAOJSON(True)
+            self.users = load_users('../clinic/users.txt')
+
 
     def __repr__(self):
         """
@@ -124,12 +132,22 @@ class Controller:
         """
         # Not logged in guard case
         if not self.isLogged: raise IllegalAccessException
+
+        patients = (self.patient_dao.list_patients()
+                    if self.autosave
+                    else self.patients)
+
         # Phn already in use guard case
-        if phn in [p.phn for p in self.patients]: raise IllegalOperationException
+        if phn in [p.phn for p in patients]: raise IllegalOperationException
 
         patient_info = (phn, name, dob, phone, email, addr)  # pack patient info into tuple
         p = Patient(*patient_info)
-        self.patients.append(p)
+
+        if self.autosave:
+            self.patient_dao.create_patient(p)
+        else:
+            patients.append(p)
+
         return p
 
     def retrieve_patients(self, name_search: str) -> Optional[List[Patient]]:
@@ -141,8 +159,12 @@ class Controller:
         # not logged in guard case
         if not self.isLogged: raise IllegalAccessException
 
+        patients = (self.patient_dao.list_patients()
+                    if self.autosave
+                    else self.patients)
+
         # return patients with name search token in their name if logged in
-        return [p for p in self.patients if name_search in p.name]
+        return [p for p in patients if name_search in p.name]
 
     def search_patient(self, phn: int) -> Optional[Patient]:
         """
@@ -153,8 +175,12 @@ class Controller:
         # not logged in guard case
         if not self.isLogged: raise IllegalAccessException
 
+        patients = (self.patient_dao.list_patients()
+                    if self.autosave
+                    else self.patients)
+
         # return patient with given phn if logged in
-        return next((p for p in self.patients if p.phn == phn), None)
+        return next((p for p in patients if p.phn == phn), None)
 
     def update_patient(self, phn: int,
                        new_phn: int,
@@ -176,16 +202,25 @@ class Controller:
         """
         # not logged in guard case
         if not self.isLogged: raise IllegalAccessException
+
+        patients = (self.patient_dao.list_patients()
+                    if self.autosave
+                    else self.patients)
+
         # phn of patient to update is not found guard case
-        if (phn not in [p.phn for p in self.patients]
+        if (phn not in [p.phn for p in patients]
                 # new phn in use guard case
-                or any(new_phn == p_.phn for p_ in self.patients if p_.phn != phn)
+                or any(new_phn == p_.phn for p_ in patients if p_.phn != phn)
                 # updating current patient guard case
                 or (self.currentPatient is not None and phn == self.currentPatient.phn)
-        ): raise IllegalOperationException
+            ): raise IllegalOperationException
 
         new_info = (new_phn, new_name, new_dob, new_phone, new_email, new_addr)
-        self.search_patient(phn).update(*new_info)
+
+        if self.autosave:
+            self.patient_dao.update_patient(phn, Patient(*new_info))
+        else:
+            self.search_patient(phn).update(*new_info)
         return True
 
     def delete_patient(self, phn: int) -> Optional[bool]:
@@ -222,7 +257,10 @@ class Controller:
         # not logged in guard case
         if not self.isLogged: raise IllegalAccessException
 
-        return self.patients
+        if self.autosave:
+            return self.patient_dao.list_patients()
+        else:
+            return self.patients
 
     def get_current_patient(self) -> Optional[Patient]:
         """
@@ -242,8 +280,13 @@ class Controller:
         """
         # not logged in guard case
         if not self.isLogged: raise IllegalAccessException
+
+        patients = (self.patient_dao.list_patients()
+                    if self.autosave
+                    else self.patients)
+
         # phn not found guard case
-        if phn not in [p.phn for p in self.patients]: raise IllegalOperationException
+        if phn not in [p.phn for p in patients]: raise IllegalOperationException
 
         patient = self.search_patient(phn)
 

@@ -1,6 +1,7 @@
 import os
 from unittest import TestCase
 from unittest import main
+import unittest
 from clinic.controller import Controller
 from clinic.patient import Patient
 from clinic.patient_record import PatientRecord
@@ -17,7 +18,7 @@ class IntegrationTest(TestCase):
 
     def setUp(self):
         # set autosave to False to avoid testing persistence
-        self.controller = Controller(autosave=False)
+        self.controller = Controller(autosave=True)
 
     # set autosave to True to test persistence
     # self.controller = Controller(autosave=True)
@@ -295,6 +296,8 @@ class IntegrationTest(TestCase):
 
         # login
         self.assertTrue(self.controller.login("user", "123456"), "login correctly")
+
+        print(self.controller.list_patients())
 
         # add some patients
         self.controller.create_patient(9798884444, "Ali Mesbah", "1980-03-03", "250 301 6060", "mesbah.ali@gmail.com",

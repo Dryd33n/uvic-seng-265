@@ -1,5 +1,6 @@
 from typing import Optional
 
+from clinic.dao.patient_dao import PatientDAO
 from clinic.note import Note
 from clinic.patient_record import *
 
