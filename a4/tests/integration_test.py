@@ -297,8 +297,6 @@ class IntegrationTest(TestCase):
         # login
         self.assertTrue(self.controller.login("user", "123456"), "login correctly")
 
-        print(self.controller.list_patients())
-
         # add some patients
         self.controller.create_patient(9798884444, "Ali Mesbah", "1980-03-03", "250 301 6060", "mesbah.ali@gmail.com",
                                        "500 Fairfield Rd, Victoria")

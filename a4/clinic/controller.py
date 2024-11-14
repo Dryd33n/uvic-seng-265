@@ -15,6 +15,12 @@ from clinic.exception.no_current_patient_exception import NoCurrentPatientExcept
 
 
 def sha256_hash(input_string: str) -> str:
+    """
+    Convert a given string into its respective hexadecimal sha256 hash
+
+    :param input_string: the string to be hashed
+    :return: the hash of the given string
+    """
     # Convert the input string to bytes, then hash it
     sha256 = hashlib.sha256(input_string.encode())
     # Return the hexadecimal representation of the hash
@@ -22,6 +28,12 @@ def sha256_hash(input_string: str) -> str:
 
 
 def load_users(path: str) -> Dict[str, str]:
+    """
+    Loads the users from the users.txt file and stores them in a dictionary
+
+    :param path: path to users file
+    :return: dictionary containing users and hashed passwords
+    """
     users = {}
 
     with open(path, 'r') as file:
@@ -44,10 +56,10 @@ class Controller:
     - currentPatient: Patient:   The current patient.
     """
 
-    def __init__(self, autosave=False):
+    def __init__(self, autosave=True):
         """
         Initialize the controller with the default values.
-        :param autosave: 
+        :param autosave: whether the implementation is using persistence or not
         """
         self.autosave = autosave
         self.isLogged = False
@@ -59,11 +71,11 @@ class Controller:
         self.currentPatient: Patient = None
 
         if self.autosave:
-            self.patient_dao = PatientDAOJSON(True)
-            self.users = load_users('../clinic/users.txt')
+            self.patient_dao = PatientDAOJSON(auto_save=True)
+            self.patient_dao.init_file()
+            self.users = load_users('clinic/users.txt')
 
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Returns a string representation of the controller.
         :return: string representation of the controller
@@ -141,7 +153,7 @@ class Controller:
         if phn in [p.phn for p in patients]: raise IllegalOperationException
 
         patient_info = (phn, name, dob, phone, email, addr)  # pack patient info into tuple
-        p = Patient(*patient_info)
+        p = Patient(*patient_info, autosave=self.autosave)
 
         if self.autosave:
             self.patient_dao.create_patient(p)
@@ -231,11 +243,16 @@ class Controller:
         """
         # not logged in guard case
         if not self.isLogged: raise IllegalAccessException
+
+        patients = (self.patient_dao.list_patients()
+                    if self.autosave
+                    else self.patients)
+
         # phn not found guard case
-        if (phn not in [p.phn for p in self.patients]
+        if (phn not in [p.phn for p in patients]
                 # deleting current patient guard case
                 or (self.currentPatient is not None and phn == self.currentPatient.phn)
-        ): raise IllegalOperationException
+            ): raise IllegalOperationException
 
         # search for patient with given phn set none if patient is current patient
         patient = (self.search_patient(phn)
@@ -244,7 +261,10 @@ class Controller:
 
         # if patient is not current patient and is found remove patient from list
         if patient:
-            self.patients.remove(patient)
+            if self.autosave:
+                self.patient_dao.delete_patient(patient.phn)
+            else:
+                self.patients.remove(patient)
             return True
         else:
             return None
@@ -257,10 +277,9 @@ class Controller:
         # not logged in guard case
         if not self.isLogged: raise IllegalAccessException
 
-        if self.autosave:
-            return self.patient_dao.list_patients()
-        else:
-            return self.patients
+        return (self.patient_dao.list_patients()
+                if self.autosave
+                else self.patients)
 
     def get_current_patient(self) -> Optional[Patient]:
         """

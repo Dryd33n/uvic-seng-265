@@ -4,11 +4,11 @@ from abc import ABC, abstractmethod
 class NoteDAO(ABC):
 
     @abstractmethod
-    def create_note(self, text):
+    def create_note(self, text) -> None:
         pass
 
     @abstractmethod
-    def retrieve_notes(self, search_string):
+    def retrieve_notes(self, search_string) -> None:
         pass
 
     @abstractmethod

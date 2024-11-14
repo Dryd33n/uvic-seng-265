@@ -24,7 +24,8 @@ class Patient:
                  birthdate: str,  # Patient Birthdate
                  phone: str,      # Patient Phone Number
                  email: str,      # Patient Email
-                 address: str):   # Patient Home Address
+                 address: str,    # Patient Home Address
+                 autosave=False):
         """
         Initializes a new patient with the given information.
         :param phn:         Patient Health Number
@@ -40,7 +41,7 @@ class Patient:
         self.phone = phone
         self.email = email
         self.address = address
-        self.record = PatientRecord()
+        self.record = PatientRecord(autosave=autosave, phn=phn)
 
     def __eq__(self, other):
         """
@@ -60,7 +61,7 @@ class Patient:
         Returns a string representation of the patient.
         :return: string representation of the patient
         """
-        return (f"Patient: {self.name} #{self.phn} D.O.B: {self.birthdate}, Phone: {self.phone}, Email: {self.email}, "
+        return (f"Patient: {self.name}, {self.phn} D.O.B: {self.birthdate}, Phone: {self.phone}, Email: {self.email}, "
                 f"Address: {self.address}")
 
     def update(self,

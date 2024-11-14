@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from clinic.dao.note_dao_pickle import NoteDAOPickle
 from clinic.note import Note
 
 
@@ -12,12 +13,18 @@ class PatientRecord:
     - records: List[Note]   List of notes in the patient
     """
 
-    def __init__(self):
+    def __init__(self, autosave=False, phn=None):
         """
         Initializes a new patient record with an empty list of notes and an auto-counter of 1.
+        :param phn:
         """
-        self.autoCounter = 1
+        self.autoCounter = 0
         self.records: List[Note] = []
+        self.autosave = autosave
+
+        if autosave:
+            self.note_pickle = NoteDAOPickle(phn)
+            self.autoCounter = self.note_pickle.count_notes()
 
     def __eq__(self, other) -> bool:
         """
@@ -41,9 +48,15 @@ class PatientRecord:
         :param msg: the message of the note
         :return: the new note
         """
-        self.records.insert(0, (n := Note(self.autoCounter, msg)))
+        note = Note(self.autoCounter+1, msg)
+
+        if self.autosave:
+            self.note_pickle.create_note(msg)
+        else:
+            self.records.insert(0, note)
+
         self.autoCounter += 1
-        return n
+        return note
 
     def search_note(self, code: int) -> Optional[Note]:
         """
@@ -51,7 +64,11 @@ class PatientRecord:
         :param code: the code of the note to search for
         :return: the note with the given code, or None if not found
         """
-        note = next((n for n in self.records if n.code == code), None)
+        notes = (self.note_pickle.list_notes()
+                 if self.autosave
+                 else self.records)
+
+        note = next((n for n in notes if n.code == code), None)
 
         return note
 
@@ -61,7 +78,11 @@ class PatientRecord:
         :param search: the string to search for
         :return: sorted list of notes that contain the search string
         """
-        return sorted([n for n in self.records if (search in n.text)], key=lambda n: n.code)
+        notes = (self.note_pickle.list_notes()
+                 if self.autosave
+                 else self.records)
+
+        return sorted([n for n in notes if (search in n.text)], key=lambda n: n.code)
 
     def update_note(self, code: int, msg: str) -> bool:
         """
@@ -73,7 +94,10 @@ class PatientRecord:
         note = self.search_note(code)
 
         if note:
-            note.update_note(msg)
+            if self.autosave:
+                self.note_pickle.update_note(code, msg)
+            else:
+                note.update_note(msg)
             return True
         else:
             return False
@@ -87,7 +111,10 @@ class PatientRecord:
         note = self.search_note(code)
 
         if note:
-            self.records.remove(note)
+            if self.autosave:
+                self.note_pickle.delete_note(code)
+            else:
+                self.records.remove(note)
             self.autoCounter -= 1
             return True
         else:
@@ -98,6 +125,7 @@ class PatientRecord:
         Lists all notes in the patient's record.
         :return: a list of all notes in the patient's record
         """
-        return self.records
-
+        return (self.note_pickle.list_notes()
+                if self.autosave
+                else self.records)
 
