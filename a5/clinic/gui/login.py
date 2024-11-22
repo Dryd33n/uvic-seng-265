@@ -19,13 +19,11 @@ from PyQt6.QtWidgets import (QApplication, QFrame, QLabel, QLineEdit,
                                QPushButton, QSizePolicy, QSpacerItem, QVBoxLayout,
                                QWidget)
 
-from clinic.controller import Controller
 
 
 
 class Ui_Login(object):
-    def __init__(self, Login, controller: Controller):
-        self.controller = controller
+    def __init__(self, Login):
         self.main_window = None
         self.main_ui = None
 
@@ -182,12 +180,23 @@ class Ui_Login(object):
 
         self.pushButton.setObjectName(u"pushButton")
         self.pushButton.setFont(font)
-        self.pushButton.setStyleSheet(u"margin:  0px 120px 10px 120px;\n"
-                                      "background-color: rgb(77, 77, 77);\n"
-                                      "border: 1px solid rgba(255, 255, 255, 0);\n"
-                                      "letter-spacing: 3px;\n"
-                                      "border-radius: 11px;\n"
-                                      "padding: 3px;")
+        self.pushButton.setStyleSheet(u"""
+    QPushButton {
+        margin: 0px 120px 10px 120px;
+        background-color: rgb(77, 77, 77);
+        border: 1px solid rgba(255, 255, 255, 0);
+        letter-spacing: 3px;
+        border-radius: 11px;
+        padding: 3px;
+    }
+    QPushButton:hover {
+        background-color: rgb(100, 100, 100); /* Lighter background on hover */
+        border: 1px solid rgba(255, 255, 255, 0.5); /* Visible border on hover */
+    }
+    QPushButton:pressed {
+        background-color: rgb(66, 66, 66); /* Darker background when pressed */
+    }
+    """)
 
         self.login_button_box.addWidget(self.pushButton)
 

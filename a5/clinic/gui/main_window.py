@@ -27,9 +27,7 @@ from clinic.patient import Patient
 
 
 class Ui_MainScreen(object):
-    def __init__(self, MainScreen, controller: Controller):
-        self.controller = controller
-
+    def __init__(self, MainScreen):
         if not MainScreen.objectName():
             MainScreen.setObjectName(u"MainScreen")
         MainScreen.resize(1059, 921)
@@ -204,24 +202,50 @@ class Ui_MainScreen(object):
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.horizontalLayout_7 = QHBoxLayout()
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
-        self.create_patient_btn = QPushButton(self.frame_4)
-        self.create_patient_btn.setObjectName(u"create_patient_btn")
+        self.main_create_patient_btn = QPushButton(self.frame_4)
+        self.main_create_patient_btn.setObjectName(u"create_patient_btn")
         font5 = QFont()
         font5.setFamilies([u"Montserrat"])
         font5.setBold(True)
-        self.create_patient_btn.setFont(font5)
-        self.create_patient_btn.setStyleSheet(u"background-color: rgb(62, 62, 62);\n"
-                                              "padding:10px;\n"
-                                              "border-radius: 15px;")
+        self.main_create_patient_btn.setFont(font5)
+        self.main_create_patient_btn.setStyleSheet(u"""
+    QPushButton {
+        background-color: rgb(77, 77, 77);
+        border: 1px solid rgba(255, 255, 255, 0);
+        letter-spacing: 1px;
+        border-radius: 11px;
+        padding: 3px;
+    }
+    QPushButton:hover {
+        background-color: rgb(100, 100, 100); /* Lighter background on hover */
+        border: 1px solid rgba(255, 255, 255, 0.5); /* Visible border on hover */
+    }
+    QPushButton:pressed {
+        background-color: rgb(66, 66, 66); /* Darker background when pressed */
+    }
+    """)
 
-        self.horizontalLayout_7.addWidget(self.create_patient_btn)
+        self.horizontalLayout_7.addWidget(self.main_create_patient_btn)
 
         self.delete_patient_btn = QPushButton(self.frame_4)
         self.delete_patient_btn.setObjectName(u"delete_patient_btn")
         self.delete_patient_btn.setFont(font5)
-        self.delete_patient_btn.setStyleSheet(u"background-color: rgb(62, 62, 62);\n"
-                                              "padding:10px;\n"
-                                              "border-radius: 15px;")
+        self.delete_patient_btn.setStyleSheet(u"""
+    QPushButton {
+        background-color: rgb(77, 77, 77);
+        border: 1px solid rgba(255, 255, 255, 0);
+        letter-spacing: 1px;
+        border-radius: 11px;
+        padding: 3px;
+    }
+    QPushButton:hover {
+        background-color: rgb(100, 100, 100); /* Lighter background on hover */
+        border: 1px solid rgba(255, 255, 255, 0.5); /* Visible border on hover */
+    }
+    QPushButton:pressed {
+        background-color: rgb(66, 66, 66); /* Darker background when pressed */
+    }
+    """)
 
         self.horizontalLayout_7.addWidget(self.delete_patient_btn)
 
@@ -230,9 +254,22 @@ class Ui_MainScreen(object):
         self.logout_btn = QPushButton(self.frame_4)
         self.logout_btn.setObjectName(u"logout_btn")
         self.logout_btn.setFont(font5)
-        self.logout_btn.setStyleSheet(u"background-color: rgb(62, 62, 62);\n"
-                                      "padding:10px;\n"
-                                      "border-radius: 15px;")
+        self.logout_btn.setStyleSheet(u"""
+    QPushButton {
+        background-color: rgb(77, 77, 77);
+        border: 1px solid rgba(255, 255, 255, 0);
+        letter-spacing: 1px;
+        border-radius: 11px;
+        padding: 3px;
+    }
+    QPushButton:hover {
+        background-color: rgb(100, 100, 100); /* Lighter background on hover */
+        border: 1px solid rgba(255, 255, 255, 0.5); /* Visible border on hover */
+    }
+    QPushButton:pressed {
+        background-color: rgb(66, 66, 66); /* Darker background when pressed */
+    }
+    """)
 
         self.verticalLayout_3.addWidget(self.logout_btn)
 
@@ -466,27 +503,66 @@ class Ui_MainScreen(object):
         font9 = QFont()
         font9.setBold(True)
         self.create_patient_record_note_btn.setFont(font9)
-        self.create_patient_record_note_btn.setStyleSheet(u"background-color: rgb(62, 62, 62);\n"
-                                                          "padding: 10px;\n"
-                                                          "border-radius: 15px;")
+        self.create_patient_record_note_btn.setStyleSheet(u"""
+    QPushButton {
+        background-color: rgb(77, 77, 77);
+        border: 1px solid rgba(255, 255, 255, 0);
+        letter-spacing: 1px;
+        border-radius: 11px;
+        padding: 3px;
+    }
+    QPushButton:hover {
+        background-color: rgb(100, 100, 100); /* Lighter background on hover */
+        border: 1px solid rgba(255, 255, 255, 0.5); /* Visible border on hover */
+    }
+    QPushButton:pressed {
+        background-color: rgb(66, 66, 66); /* Darker background when pressed */
+    }
+    """)
 
         self.horizontalLayout_12.addWidget(self.create_patient_record_note_btn)
 
         self.edit_patient_btn = QPushButton(self.frame_8)
         self.edit_patient_btn.setObjectName(u"edit_patient_btn")
         self.edit_patient_btn.setFont(font9)
-        self.edit_patient_btn.setStyleSheet(u"background-color: rgb(62, 62, 62);\n"
-                                            "padding: 10px;\n"
-                                            "border-radius: 15px;")
+        self.edit_patient_btn.setStyleSheet(u"""
+    QPushButton {
+        background-color: rgb(77, 77, 77);
+        border: 1px solid rgba(255, 255, 255, 0);
+        letter-spacing: 1px;
+        border-radius: 11px;
+        padding: 3px;
+    }
+    QPushButton:hover {
+        background-color: rgb(100, 100, 100); /* Lighter background on hover */
+        border: 1px solid rgba(255, 255, 255, 0.5); /* Visible border on hover */
+    }
+    QPushButton:pressed {
+        background-color: rgb(66, 66, 66); /* Darker background when pressed */
+    }
+    """)
 
         self.horizontalLayout_12.addWidget(self.edit_patient_btn)
 
         self.delete_patient_btn_2 = QPushButton(self.frame_8)
         self.delete_patient_btn_2.setObjectName(u"delete_patient_btn_2")
         self.delete_patient_btn_2.setFont(font5)
-        self.delete_patient_btn_2.setStyleSheet(u"background-color: rgb(62, 62, 62);\n"
-                                                "padding: 10px;\n"
-                                                "border-radius: 15px;")
+        self.delete_patient_btn_2.setStyleSheet(u"""
+    QPushButton {
+        background-color: rgb(77, 77, 77);
+        border: 1px solid rgba(255, 255, 255, 0);
+        letter-spacing: 1px;
+        border-radius: 11px;
+        padding: 3px;
+    }
+    QPushButton:hover {
+        background-color: rgb(100, 100, 100); /* Lighter background on hover */
+        border: 1px solid rgba(255, 255, 255, 0.5); /* Visible border on hover */
+    }
+    QPushButton:pressed {
+        background-color: rgb(66, 66, 66); /* Darker background when pressed */
+    }
+    """)
 
         self.horizontalLayout_12.addWidget(self.delete_patient_btn_2)
 
@@ -505,8 +581,8 @@ class Ui_MainScreen(object):
         self.frame_9 = QFrame(MainScreen)
         self.frame_9.setObjectName(u"frame_9")
         self.frame_9.setStyleSheet(u"background-color: rgb(24, 24, 24);\n"
-                                   "border: 0px solid rgba(255, 255, 255, 0);\n"
-                                   "border-radius: 10px;")
+        "border: 0px solid rgba(255, 255, 255, 0);\n"
+        "border-radius: 10px;")
         self.frame_9.setFrameShape(QFrame.Shape.StyledPanel)
         self.frame_9.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout_13 = QHBoxLayout(self.frame_9)
@@ -561,9 +637,9 @@ class Ui_MainScreen(object):
         self.record_search_field.setMinimumSize(QSize(220, 0))
         self.record_search_field.setFont(font2)
         self.record_search_field.setStyleSheet(u"background-color: rgba(255, 255, 255, 0);\n"
-                                               "border:1px solid rgb(59, 59, 59);\n"
-                                               "padding: 6px;\n"
-                                               "border-radius: 8px;")
+        "border:1px solid rgb(59, 59, 59);\n"
+        "padding: 6px;\n"
+        "border-radius: 8px;")
 
         self.verticalLayout_10.addWidget(self.record_search_field)
 
@@ -614,18 +690,44 @@ class Ui_MainScreen(object):
         self.edit_note_btn = QPushButton(self.frame_11)
         self.edit_note_btn.setObjectName(u"edit_note_btn")
         self.edit_note_btn.setFont(font5)
-        self.edit_note_btn.setStyleSheet(u"background-color: rgb(62, 62, 62);\n"
-                                         "padding: 10px;\n"
-                                         "border-radius: 15px;")
+        self.edit_note_btn.setStyleSheet(u"""
+    QPushButton {
+        background-color: rgb(77, 77, 77);
+        border: 1px solid rgba(255, 255, 255, 0);
+        letter-spacing: 1px;
+        border-radius: 11px;
+        padding: 3px;
+    }
+    QPushButton:hover {
+        background-color: rgb(100, 100, 100); /* Lighter background on hover */
+        border: 1px solid rgba(255, 255, 255, 0.5); /* Visible border on hover */
+    }
+    QPushButton:pressed {
+        background-color: rgb(66, 66, 66); /* Darker background when pressed */
+    }
+    """)
 
         self.horizontalLayout_17.addWidget(self.edit_note_btn)
 
         self.delete_note_btn = QPushButton(self.frame_11)
         self.delete_note_btn.setObjectName(u"delete_note_btn")
         self.delete_note_btn.setFont(font5)
-        self.delete_note_btn.setStyleSheet(u"background-color: rgb(62, 62, 62);\n"
-                                           "padding: 10px;\n"
-                                           "border-radius: 15px;")
+        self.delete_note_btn.setStyleSheet(u"""
+    QPushButton {
+        background-color: rgb(77, 77, 77);
+        border: 1px solid rgba(255, 255, 255, 0);
+        letter-spacing: 1px;
+        border-radius: 11px;
+        padding: 3px;
+    }
+    QPushButton:hover {
+        background-color: rgb(100, 100, 100); /* Lighter background on hover */
+        border: 1px solid rgba(255, 255, 255, 0.5); /* Visible border on hover */
+    }
+    QPushButton:pressed {
+        background-color: rgb(66, 66, 66); /* Darker background when pressed */
+    }
+    """)
 
         self.horizontalLayout_17.addWidget(self.delete_note_btn)
 
@@ -679,7 +781,9 @@ class Ui_MainScreen(object):
         self.note_content.setObjectName(u"note_content")
         self.note_content.setFont(font5)
         self.note_content.setAlignment(
+
             Qt.AlignmentFlag.AlignLeading | Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+
         self.note_content.setWordWrap(True)
 
         self.horizontalLayout_20.addWidget(self.note_content)
@@ -754,12 +858,9 @@ class Ui_MainScreen(object):
         self.horizontalLayout_19.addLayout(self.horizontalLayout)
 
         self.retranslate_ui(MainScreen)
-        self.init_ui_components()
-
-        self.patient_search_field.textChanged.connect(self.handle_patient_search)
-        self.patient_list.itemClicked.connect(self.switch_current_patient)
 
         QMetaObject.connectSlotsByName(MainScreen)
+
 
     def retranslate_ui(self, MainScreen):
         MainScreen.setWindowTitle(QCoreApplication.translate("MainScreen", u"Form", None))
@@ -779,7 +880,7 @@ class Ui_MainScreen(object):
         self.patient_list.setSortingEnabled(__sortingEnabled)
 
         self.label_5.setText(QCoreApplication.translate("MainScreen", u"OPTIONS:", None))
-        self.create_patient_btn.setText(QCoreApplication.translate("MainScreen", u"CREATE PATIENT", None))
+        self.main_create_patient_btn.setText(QCoreApplication.translate("MainScreen", u"CREATE PATIENT", None))
         self.delete_patient_btn.setText(QCoreApplication.translate("MainScreen", u"DELETE PATIENT", None))
         self.logout_btn.setText(QCoreApplication.translate("MainScreen", u"LOGOUT", None))
         self.patient_details_title.setText(QCoreApplication.translate("MainScreen", u"CURRENT PATIENT: JANE DOE", None))
@@ -832,77 +933,3 @@ class Ui_MainScreen(object):
         self.note_date.setText(QCoreApplication.translate("MainScreen", u"January 1st, 2020", None))
         self.label_31.setText(QCoreApplication.translate("MainScreen", u"NOTE NUMBER:", None))
         self.note_number.setText(QCoreApplication.translate("MainScreen", u"Note Number 1", None))
-
-    def init_ui_components(self):
-        self.handle_patient_search()
-        self.fill_patient_details(None)
-
-    def handle_patient_search(self):
-        search_term = self.patient_search_field.text()
-        search_term.strip()
-
-        # SEARCH TERM EMPTY - SHOW ALL PATIENTS
-        if len(search_term) == 0:
-            self.fill_patient_list(self.controller.list_patients())
-            self.patient_search_message.setText("showing all patients")
-        # SEARCH TERM CONTAINS DIGIT - SEARCH BY PHN
-        elif re.search(r'\d', search_term):
-            patient = self.controller.search_patient(int(search_term))
-
-            if patient:
-                self.patient_search_message.setText("patient with matching PHN found")
-                self.fill_patient_list([patient])
-            else:
-                self.patient_search_message.setText("no patient with mentioned PHN")
-                self.fill_patient_list([])
-        # SEARCH TERM CONTAINS STRING - SEARCH BY NAME
-        else:
-            patients = self.controller.retrieve_patients(search_term)
-            self.patient_search_message.setText(f"{len(patients)} matching patients found")
-            self.fill_patient_list(patients)
-
-    def fill_patient_list(self, patients: List[Patient]):
-        # STYLING OPTIONS
-        font = QFont()
-        font.setFamilies([u"Montserrat"])
-        icon = QIcon(QIcon.fromTheme(u"address-book-new"))
-
-        self.patient_list.clear()
-
-        for patient in patients:
-            item = QListWidgetItem(self.patient_list)
-            item.setFont(font)
-            item.setIcon(icon)
-
-            item.setText(patient.name)
-            item.setData(32, patient)
-
-    def fill_patient_details(self, patient: Optional[Patient]):
-        if patient:
-            # Parse the date
-            date_obj = datetime.strptime(patient.birthdate, "%Y-%m-%d")
-            dob = date_obj.strftime("%b %d, %Y").upper()
-            dob = dob.replace(" 0", " ")
-
-            self.patient_details_title.setText(f"CURRENT PATIENT: {patient.name.upper()}")
-            self.patient_first_name.setText(patient.name)
-            self.patient_phn.setText(str(patient.phn))
-            self.patient_dob.setText(dob)
-            self.patient_phone_number.setText(patient.phone)
-            self.patient_email_address.setText(patient.email)
-            self.patient_home_address.setText(patient.address)
-        else:
-            self.patient_details_title.setText(f"CURRENT PATIENT: NONE")
-            self.patient_first_name.setText(" ")
-            self.patient_phn.setText(" ")
-            self.patient_dob.setText(" ")
-            self.patient_phone_number.setText(" ")
-            self.patient_email_address.setText(" ")
-            self.patient_home_address.setText(" ")
-
-    def switch_current_patient(self, item):
-        patient = item.data(32)
-
-        self.controller.unset_current_patient()
-        self.controller.set_current_patient(patient.phn)
-        self.fill_patient_details(patient)
