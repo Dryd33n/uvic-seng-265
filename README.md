@@ -1,4 +1,4 @@
-# SENG-265 Course Projects
+# <img src="https://github.com/Dryd33n/Dryd33n/blob/main/logos/uvic.png" height="25"> SENG265: Software Development Methods
 Project files for UVic SENG 265 course in C and Python, including topics such as: 
 
 Topics Covered in C
