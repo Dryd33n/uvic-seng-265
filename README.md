@@ -21,7 +21,7 @@ Topics Covered in Python
 - **Software Design**: Modular structure, type hinting, and reusable utilities.
 - **Iterative Development**: Evolving systems through incremental improvements.
 
-## [Assignment 1: Survey Processing in C](./a1)
+## [Assignment 1: Survey Processing in C](./a1) 147%
 **Purpose**: Analyze survey responses from science and engineering students about computer science attitudes.
 
 **Key Features**:
@@ -32,7 +32,7 @@ Topics Covered in Python
 
 ---
 
-## [Assignment 2: Enhanced Survey Processing in C](./a2)
+## [Assignment 2: Enhanced Survey Processing in C](./a2) 112%
 **Purpose**: Extends Assignment 1 with dynamic filtering and scoring of survey data.
 
 **Key Features**:
@@ -43,7 +43,7 @@ Topics Covered in Python
 
 ---
 
-## [Assignment 3: Clinic Management System in Python](./a3)
+## [Assignment 3: Clinic Management System in Python](./a3) 100%
 **Purpose**: A basic patient and note management system.
 
 **Key Features**:
@@ -54,7 +54,7 @@ Topics Covered in Python
 
 ---
 
-## [Assignment 4: Persistent Clinic Management System in Python](./a4)
+## [Assignment 4: Persistent Clinic Management System in Python](./a4) 100%
 **Purpose**: Enhances Assignment 3 by introducing data persistence.
 
 **Key Features**:
@@ -66,7 +66,7 @@ Topics Covered in Python
 
 ---
 
-## [Assignment 5: GUI-based Clinic Management System in Python](./a5)
+## [Assignment 5: GUI-based Clinic Management System in Python](./a5) 100%
 **Purpose**: Evolves Assignment 4 into a GUI-based application using PyQt6.
 
 **Key Features**:
